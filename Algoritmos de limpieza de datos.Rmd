@@ -1,0 +1,89 @@
+---
+title: "Algoritmos de limpieza de datos"
+author: "Ccanadas"
+date: "2022-09-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Reemplazo por muestra aleatoria:
+
+```{r mas}
+
+#x es un vector de datos que puede contener NA
+rand.impute <- function(x) {
+  # missing contiene un vector de valores T/F dependiendo del NA de x
+  missing <- is.na(x)
+  #n.missing contiene cuantos valores son NA dentro de x
+  n.missing <- sum(missing)
+  #x.obs son los valores conocidos que tienen dato diferente de NA en x
+  x.obs <- x[!missing]
+  #por defecto, devolveré lo mismo que había entrado por parámetro
+  imputed <- x
+  #en los valores que faltaban, los reemplazamos por una muestra
+  #de los que si conocemos (MAS)
+  imputed[missing] <- sample(x.obs, n.missing, replace = TRUE)
+  return (imputed)
+}
+
+
+##ESTA ES LA FUNCIÓN A LA QUE HAY QUE LLAMAR
+random.impute.data.frame <- function(dataframe, cols){
+  names <- names(dataframe)
+  for(col in cols){
+    name <- paste(names[col], "imputed", sep = ".")
+    dataframe[name] = rand.impute(dataframe[,col])
+  }
+  dataframe
+}
+
+
+
+```
+
+
+
+## Función de reescalado lineal:
+
+```{r reescalado}
+
+rescale.many <- function(dataframe, cols){
+  names <- names(dataframe)
+  for(col in cols){
+    name <- paste(names[col], "rescaled", sep = ".")
+    dataframe[name] <- rescale(dataframe[,col]) 
+  }
+  cat(paste("Hemos reescalado ", length(cols), " variable(s)"))
+  dataframe
+}
+
+
+
+```
+
+
+## Función de normalizado
+
+Aplica una camapana de Gauss estandarizada a las columnas del daframe que queramos normalizar a partir de la fórmula:
+
+$$Z=\frac{X-\mu}{\sigma} $$
+
+```{r normalizado}
+
+scale.many = function(dataframe, cols){
+  names <- names(dataframe)
+  for(col in cols){
+    name <- paste(names[col], "z", sep = ".")
+    dataframe[name] <- scale(dataframe[,col])
+  }
+  cat(paste("Hemos normalizado ", length(cols), " variable(s)"))
+  dataframe
+}
+
+
+
+```
+
