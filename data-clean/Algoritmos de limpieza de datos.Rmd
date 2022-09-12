@@ -11,6 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Reemplazo por muestra aleatoria:
 
+Susituye un conjunto de valores NA por una muestra simple aleatoria de un conjunto de valores que existan.
+Es decir, almacenamos los valores existentes en un vector y para cada valor NA dentro de ese vector se sustituye de manera aleatoria por un valor almacenado.
+
 ```{r mas}
 
 #x es un vector de datos que puede contener NA
@@ -47,6 +50,9 @@ random.impute.data.frame <- function(dataframe, cols){
 
 
 ## Función de reescalado lineal:
+
+Toma una columna de un dataframe y los reescala de 0 a 1 a partir de la fórmula
+$$y_i=\frac{x_i-min(x)}{max(x)-min(x)} $$ 
 
 ```{r reescalado}
 
@@ -87,3 +93,5 @@ scale.many = function(dataframe, cols){
 
 ```
 
+
+## ffg
