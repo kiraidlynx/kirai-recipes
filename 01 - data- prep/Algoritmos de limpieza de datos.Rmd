@@ -72,13 +72,13 @@ Limpieza selectiva de NAs por columna: df[!is.na(df$col),]; donde ! es la negaci
 complete.cases(): devuelve un vector booleano de los datos que faltan, se usa para filtrar como alternativa al na.omit()
 
 
-Si tenememos un valor conocido (por ejemplo el 0), que en realidad es un dato erroneo como un NA, se sustituye el valor primero y luego se trata como NA: df$col[df$col==0]<-NA
+Si tenememos un valor conocido (por ejemplo el 0), que en realidad es un dato erroneo como un NA, se sustituye el valor primero y luego se trata como NA: `{r , eval=FALSE} df$col[df$col==0]<-NA`
 
 si queremos usar cálculos sobre el dataset ignorando los NAs usar el parámetro na.rm=TRUE
 
 ### Reemplazo de NAs por la media
 
-```{r}
+```{r NAtomean, eval=FALSE}
 df$new_col<-ifelse(is.na(df$col), 
                    mean(df$new_col, na.rm=TRUE), 
                    df$col)

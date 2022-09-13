@@ -372,21 +372,25 @@ pre code {
 
 <div id="lectura-de-datos" class="section level1">
 <h1>Lectura de datos</h1>
-<div id="datos-csv" class="section level2">
-<h2>Datos csv</h2>
+<p>Usar summary y str una vez cargados para pasar a la siguiente
+fase.</p>
+<div id="datos-csv" class="section level3">
+<h3>Datos csv</h3>
 <p>read.csv(x, header= , sep=“” , dec=“” ,string.na=“” ,
 stringAsFactors=TRUE/FALSE )</p>
 <p>col.names=c(vector de nombres)</p>
 <p>castings: usar la función as.character(), as.factor(),…</p>
 <p>stringAsFactors= FALSE para que nos trate los NAs como objetos</p>
 </div>
-<div id="datos-xml" class="section level2">
-<h2>Datos XML</h2>
+<div id="datos-xml" class="section level3">
+<h3>Datos XML</h3>
+<p>libreria “XML”</p>
 <p>cmldoc&lt;-xmlParse(“url”)</p>
 <p>rootnode&lt;-xmlRoot(xmldoc)</p>
 <p>data&lt;-xmlSApply(rootnode, function(x)xmlSApply(x, xmlValue)) -
 Objeto matriz</p>
 <p>dataframe&lt;- data.frame(t(data), rown.names=NULL)</p>
+</div>
 <div id="datos-html" class="section level3">
 <h3>Datos HTML</h3>
 <p>tabla&lt;-readHTMLTable(“url”) - lista a la que podemos acceder
@@ -395,34 +399,46 @@ con:</p>
 la tabla que necesitemos</p>
 <p>tabla&lt;-readHTMLTable(“url”, which=n)</p>
 </div>
-</div>
-<div id="datos-json" class="section level2">
-<h2>Datos JSON</h2>
+<div id="datos-json" class="section level3">
+<h3>Datos JSON</h3>
+<p>libreria “jsonlite”</p>
 <p>data&lt;-fromJSON(“url”)</p>
 <p>Acceder a los datos a través de la sintasis de $</p>
 <p>toJSON() - para convertir a JSON</p>
 </div>
-<div id="ficheros-de-ancho-fijo" class="section level2">
-<h2>Ficheros de ancho fijo</h2>
+<div id="ficheros-de-ancho-fijo" class="section level3">
+<h3>Ficheros de ancho fijo</h3>
 </div>
-<div id="ficheros-.rdata-y-.rds" class="section level2">
-<h2>Ficheros .Rdata y .rds</h2>
+<div id="ficheros-.rdata-y-.rds" class="section level3">
+<h3>Ficheros .Rdata y .rds</h3>
 </div>
 </div>
 <div id="limpieza-de-datos-nas" class="section level1">
 <h1>Limpieza de datos NAs</h1>
-<div id="borrado-de-nas" class="section level2">
-<h2>Borrado de NAs</h2>
+<p>Usar summary y str una vez cargados para pasar a la siguiente
+fase.</p>
+<div id="borrado-de-nas" class="section level3">
+<h3>Borrado de NAs</h3>
 <p>Borrar todas las filas que contengan NAs: df&lt;-na.omit(df)</p>
-<p>Limpieza selectiva de NAs por columna: df[!is.na(df$col),]</p>
+<p>Limpieza selectiva de NAs por columna: df[!is.na(df$col),]; donde !
+es la negación booleana</p>
 <p>complete.cases(): devuelve un vector booleano de los datos que
 faltan, se usa para filtrar como alternativa al na.omit()</p>
 <p>Si tenememos un valor conocido (por ejemplo el 0), que en realidad es
 un dato erroneo como un NA, se sustituye el valor primero y luego se
-trata como NA: df<span class="math inline">\(col[df\)</span>col==0]&lt;-NA</p>
+trata como NA:
+<code>{r , eval=FALSE} df$col[df$col==0]&lt;-NA</code></p>
+<p>si queremos usar cálculos sobre el dataset ignorando los NAs usar el
+parámetro na.rm=TRUE</p>
 </div>
-<div id="reemplazo-por-muestra-aleatoria" class="section level2">
-<h2>Reemplazo por muestra aleatoria:</h2>
+<div id="reemplazo-de-nas-por-la-media" class="section level3">
+<h3>Reemplazo de NAs por la media</h3>
+<pre class="r"><code>df$new_col&lt;-ifelse(is.na(df$col), 
+                   mean(df$new_col, na.rm=TRUE), 
+                   df$col)</code></pre>
+</div>
+<div id="reemplazo-por-muestra-aleatoria" class="section level3">
+<h3>Reemplazo por muestra aleatoria:</h3>
 <p>Susituye un conjunto de valores NA por una muestra simple aleatoria
 de un conjunto de valores que existan. Es decir, almacenamos los valores
 existentes en un vector y para cada valor NA dentro de ese vector se
@@ -454,14 +470,19 @@ random.impute.data.frame &lt;- function(dataframe, cols){
   dataframe
 }</code></pre>
 </div>
+<div id="limpieza-de-duplicados" class="section level3">
+<h3>Limpieza de duplicados</h3>
+<p>df&lt;-unique(df.original) : elimina filas duplicadas</p>
+<p>df&lt;-duplicated(df.original): devuelve vector booleano de
+duplicados</p>
+<p>df.original[duplicated(df.original)]: devuelve los duplicados</p>
 </div>
-<div id="limpieza-de-duplicados" class="section level1">
-<h1>Limpieza de duplicados</h1>
 </div>
 <div id="reescalado-y-normalizado" class="section level1">
 <h1>Reescalado y normalizado</h1>
-<div id="función-de-reescalado-lineal" class="section level2">
-<h2>Función de reescalado lineal:</h2>
+<div id="función-de-reescalado-lineal" class="section level3">
+<h3>Función de reescalado lineal</h3>
+<p>Paquete “scales”</p>
 <p>Toma una columna de un dataframe y los reescala de 0 a 1 a partir de
 la fórmula <span class="math display">\[y_i=\frac{x_i-min(x)}{max(x)-min(x)}
 \]</span></p>
@@ -475,8 +496,8 @@ la fórmula <span class="math display">\[y_i=\frac{x_i-min(x)}{max(x)-min(x)}
   dataframe
 }</code></pre>
 </div>
-<div id="función-de-normalizado" class="section level2">
-<h2>Función de normalizado</h2>
+<div id="función-de-normalizado" class="section level3">
+<h3>Función de normalizado</h3>
 <p>Aplica una camapana de Gauss estandarizada a las columnas del daframe
 que queramos normalizar a partir de la fórmula:</p>
 <p><span class="math display">\[Z=\frac{X-\mu}{\sigma} \]</span></p>
@@ -493,11 +514,29 @@ que queramos normalizar a partir de la fórmula:</p>
 </div>
 <div id="preparación-de-datos" class="section level1">
 <h1>Preparación de datos</h1>
+<div id="categorización-de-información-numérica" class="section level3">
+<h3>Categorización de información numérica</h3>
+<p>función: cut(x, breaks, labels): divide los datos numéricos en
+intervalos categorizados</p>
+</div>
+<div id="variables-ficticias" class="section level3">
+<h3>Variables ficticias</h3>
+<p>librería “dummies”: ERROR EN LA VERSIÓN</p>
+<p>Divide una columna de factores en una columna por cada nivel con
+valores 1 o 0</p>
+<p>FIX</p>
+</div>
+<div id="eliminar-información-que-falta" class="section level3">
+<h3>Eliminar información que falta</h3>
+</div>
+<div id="completar-información-que-falta" class="section level3">
+<h3>Completar información que falta</h3>
+</div>
 </div>
 <div id="corrección-de-datos" class="section level1">
 <h1>Corrección de datos</h1>
-<div id="enmascarar-outliers-impute" class="section level2">
-<h2>Enmascarar outliers (IMPUTE)</h2>
+<div id="enmascarar-outliers-impute" class="section level3">
+<h3>Enmascarar outliers (IMPUTE)</h3>
 <p>Imputa los valores por debajo del cuantil 5% por la media y los que
 estén por encima del 95% por la mediana</p>
 <pre class="r"><code>impute_outliers &lt;- function(x, removeNA = TRUE){
@@ -507,8 +546,8 @@ estén por encima del 95% por la mediana</p>
   x
 }</code></pre>
 </div>
-<div id="enmascarar-outliers-replace" class="section level2">
-<h2>Enmascarar outliers (REPLACE)</h2>
+<div id="enmascarar-outliers-replace" class="section level3">
+<h3>Enmascarar outliers (REPLACE)</h3>
 <p>Capping: sustituye los outliers por valores que estén en los extremos
 de los bigotes</p>
 <pre class="r"><code>replace_outliers &lt;- function(x, removeNA = TRUE){
