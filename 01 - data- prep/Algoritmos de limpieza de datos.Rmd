@@ -11,12 +11,82 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Lectura de datos
 
+Usar summary y str una vez cargados para pasar a la siguiente fase.
+
+### Datos csv
+
+read.csv(x, header= , sep="" , dec="" ,string.na="" , stringAsFactors=TRUE/FALSE )
+
+col.names=c(vector de nombres)
+
+castings: usar la función as.character(), as.factor(),...
+
+stringAsFactors= FALSE para que nos trate los NAs como objetos
+
+### Datos XML
+
+libreria "XML"
+
+cmldoc<-xmlParse("url")
+
+rootnode<-xmlRoot(xmldoc)
+
+data<-xmlSApply(rootnode, function(x)xmlSApply(x, xmlValue)) - Objeto matriz
+
+dataframe<- data.frame(t(data), rown.names=NULL)
+
+### Datos HTML
+
+tabla<-readHTMLTable("url") - lista a la que podemos acceder con:
+
+tabla[[n]] - si conocemos la estructura a priori podemos extraer solo la tabla que necesitemos
+
+tabla<-readHTMLTable("url", which=n)
+
+### Datos JSON
+
+libreria "jsonlite"
+
+data<-fromJSON("url")
+
+Acceder a los datos a través de la sintasis de $
+
+toJSON() - para convertir a JSON
+
+
+### Ficheros de ancho fijo
+
+### Ficheros .Rdata y .rds
+
 
 # Limpieza de datos NAs
 
-## Borrado de NAs
+Usar summary y str una vez cargados para pasar a la siguiente fase.
 
-## Reemplazo por muestra aleatoria:
+### Borrado de NAs
+
+Borrar todas las filas que contengan NAs: df<-na.omit(df)
+
+Limpieza selectiva de NAs por columna: df[!is.na(df$col),]; donde ! es la negación booleana
+
+complete.cases(): devuelve un vector booleano de los datos que faltan, se usa para filtrar como alternativa al na.omit()
+
+
+Si tenememos un valor conocido (por ejemplo el 0), que en realidad es un dato erroneo como un NA, se sustituye el valor primero y luego se trata como NA: df$col[df$col==0]<-NA
+
+si queremos usar cálculos sobre el dataset ignorando los NAs usar el parámetro na.rm=TRUE
+
+### Reemplazo de NAs por la media
+
+```{r}
+df$new_col<-ifelse(is.na(df$col), 
+                   mean(df$new_col, na.rm=TRUE), 
+                   df$col)
+```
+
+
+
+### Reemplazo por muestra aleatoria:
 
 Susituye un conjunto de valores NA por una muestra simple aleatoria de un conjunto de valores que existan.
 Es decir, almacenamos los valores existentes en un vector y para cada valor NA dentro de ese vector se sustituye de manera aleatoria por un valor almacenado.
@@ -55,12 +125,20 @@ random.impute.data.frame <- function(dataframe, cols){
 ```
 
 
-# Limpieza de duplicados
+### Limpieza de duplicados
+
+df<-unique(df.original) : elimina filas duplicadas
+
+df<-duplicated(df.original): devuelve vector booleano de duplicados
+
+df.original[duplicated(df.original)]: devuelve los duplicados
 
 
 # Reescalado y normalizado
 
-## Función de reescalado lineal:
+### Función de reescalado lineal
+
+Paquete "scales"
 
 Toma una columna de un dataframe y los reescala de 0 a 1 a partir de la fórmula
 $$y_i=\frac{x_i-min(x)}{max(x)-min(x)} $$ 
@@ -82,7 +160,7 @@ rescale.many <- function(dataframe, cols){
 ```
 
 
-## Función de normalizado
+### Función de normalizado
 
 Aplica una camapana de Gauss estandarizada a las columnas del daframe que queramos normalizar a partir de la fórmula:
 
@@ -106,10 +184,27 @@ scale.many = function(dataframe, cols){
 
 # Preparación de datos
 
+### Categorización de información numérica
+
+función: cut(x, breaks, labels): divide los datos numéricos en intervalos categorizados
+
+### Variables ficticias
+
+librería "dummies": ERROR EN LA VERSIÓN
+
+Divide una columna de factores en una columna por cada nivel con valores 1 o 0
+
+FIX
+
+### Eliminar información que falta
+
+
+### Completar información que falta
+
 
 # Corrección de datos
 
-## Enmascarar outliers (IMPUTE)
+### Enmascarar outliers (IMPUTE)
 
 Imputa los valores por debajo del cuantil 5% por la media y los que estén por encima del 95% por la mediana
 
@@ -126,7 +221,7 @@ impute_outliers <- function(x, removeNA = TRUE){
 
 ```
 
-## Enmascarar outliers (REPLACE) 
+### Enmascarar outliers (REPLACE) 
 
 Capping: sustituye los outliers por valores que estén en los extremos de los bigotes
 
