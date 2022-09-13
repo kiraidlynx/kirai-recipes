@@ -9,6 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Lectura de datos
+
+
+# Limpieza de datos NAs
+
+## Borrado de NAs
+
 ## Reemplazo por muestra aleatoria:
 
 Susituye un conjunto de valores NA por una muestra simple aleatoria de un conjunto de valores que existan.
@@ -48,6 +55,10 @@ random.impute.data.frame <- function(dataframe, cols){
 ```
 
 
+# Limpieza de duplicados
+
+
+# Reescalado y normalizado
 
 ## Función de reescalado lineal:
 
@@ -93,5 +104,67 @@ scale.many = function(dataframe, cols){
 
 ```
 
+# Preparación de datos
 
-## ffg
+
+# Corrección de datos
+
+## Enmascarar outliers (IMPUTE)
+
+Imputa los valores por debajo del cuantil 5% por la media y los que estén por encima del 95% por la mediana
+
+
+```{r imputeol}
+
+
+impute_outliers <- function(x, removeNA = TRUE){
+  quantiles <- quantile(x, c(0.05, 0.95), na.rm = removeNA)
+  x[x<quantiles[1]] <- mean(x, na.rm = removeNA)
+  x[x>quantiles[2]] <- median(x, na.rm = removeNA)
+  x
+}
+
+```
+
+## Enmascarar outliers (REPLACE) 
+
+Capping: sustituye los outliers por valores que estén en los extremos de los bigotes
+
+
+```{r replaceol}
+
+
+replace_outliers <- function(x, removeNA = TRUE){
+  qrts <- quantile(x, probs = c(0.25, 0.75), na.rm = removeNA)
+  caps <- quantile(x, probs = c(.05, .95), na.rm = removeNA)
+  iqr <- qrts[2]-qrts[1]
+  h <- 1.5 * iqr
+  x[x<qrts[1]-h] <- caps[1]
+  x[x>qrts[2]+h] <- caps[2]
+  x
+}
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
