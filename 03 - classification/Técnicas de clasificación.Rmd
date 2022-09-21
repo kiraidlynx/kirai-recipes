@@ -1,0 +1,124 @@
+---
+title: "03 - clasificación"
+author: "Ccanadas"
+date: "2022-09-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Análisis y representaciones para clasificar correctamente
+
+## Matrices de confusión 
+
+
+```{r confmatrix, eval=FALSE}
+table <- table(df$observado, cp$Predicho, 
+               dnn =  c("Actual", "Predicho"))
+```
+
+summary(table) -test chi-sq (p-vale bajo indica dependencia entre el valor actual y el predicho
+, es decir, que es eficiente)
+
+
+## Análisis de componentes principales - ACP
+
+Reducir la dimensionalidad del problema: cambio de base de matriz de datos y nos
+quedamos con componentes que son combinación lineal de las anteriores. Elegimos
+las suficientes para tener un error aceptable.
+
+1º) calculamos varianza: apply(df,2,FUN=var)
+2º) descomponer normalizando: acp<-prcomp(df, center=TRUE, scale=TRUE)
+3º) print(acp) - visualizacion de los pesos
+4º) elegir con plot - regla del codo
+   elegir con summary - cumulative proportion  + 0.80 aprox
+5º) representar con biplot: biplot(acp, scale = 0)
+6º) aplicar los cambios al df original (prod. escalar)
+
+
+```{r acp, eval=FALSE}
+
+apply(df,2,FUN=var)
+
+acp<-prcomp(df, center=TRUE, scale=TRUE)
+
+pc1 <- apply(acp$rotation[,1]*df, 1, sum)
+pc2 <- apply(acp$rotation[,2]*df, 1, sum)
+
+#si necesitamos más, añadir pc_i
+
+```
+
+
+
+## Diagramas ROC
+
+library(ROCR)
+
+Fiabilidad en nuestra clasificación: p=[0,1]
+
+1º) generar objeto de predicción
+2º) generar objeto de performance
+3º) grafico curva ROC + diagonal (peor caso)
+4º) generar objeto de corte /umbral-A partir de qué valores obtendo un verdadero positivo
+5º) escoger la probabilidad de corte para comprar con el objeto que nos llega
+
+```{r ROC, eval=FALSE}
+
+predict<-prediction(y,x)
+
+perf<-performance(predict, "tpr", "fpr")
+
+plot(perf)
+lines(par()$usr[1:2], par()$usr[3:4])
+
+prob.cuts <- data.frame(cut = perf@alpha.values[[1]],
+                          fpr = perf@x.values[[1]],
+                          tpr = perf@y.values[[1]])
+
+prob.cuts[prob.cuts$tpr>=0.8,]
+
+
+```
+
+
+con categorías, ordenar las etiquetas con label.ordering=c("no", "si") en 
+la predicción.
+
+
+# Clasificadores
+
+El método a seguir es siempre el mismo:
+
+
+1º) creamos la partición de los datos 
+
+
+2º) generamos un modelo con el tr.id (y val.id)
+
+
+3º) validamos el modelo con el conjunto testing (test.id)
+
+
+4º) Comprobamos la eficacia con matriz de confusión y/o diagrama ROC
+
+
+
+## Arboles de clasificación
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

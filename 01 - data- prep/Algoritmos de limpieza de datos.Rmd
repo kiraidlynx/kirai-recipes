@@ -1,5 +1,5 @@
 ---
-title: "Algoritmos de limpieza de datos"
+title: "01-preparacion de datos"
 author: "Ccanadas"
 date: "2022-09-12"
 output: html_document
@@ -22,6 +22,8 @@ col.names=c(vector de nombres)
 castings: usar la función as.character(), as.factor(),...
 
 stringAsFactors= FALSE para que nos trate los NAs como objetos
+
+para excluir una columna o fila se usa el número en negativo
 
 ### Datos XML
 
@@ -56,12 +58,39 @@ toJSON() - para convertir a JSON
 
 ### Ficheros de ancho fijo
 
+función d<-read.fwf("file", widths=c(vectur numérico de anchuras), col.names)
+
+parámetros:
+
+header()
+
+sep='\t' las cabeceras no respetan la anchuras
+
+skip=n -> salta n lineas al inicio del fichero
+
+widths=c(-columnas a escluior)
+
+
 ### Ficheros .Rdata y .rds
+
+función: remove(var) para limpiar memoria de R
+
+guardar `df<-save(d, file="path.rdata/rds")`
+
+
+rdata guarda muchas variables con nombres, puede sustituir variables antiguas si cargas en una sesión
+
+rds guarda el objeto pero no el nombre, más seguro
+
+cargar usar load('path') - carga el fichero pero sobreescribe, con attach() muestra warning
+
+obj<-readRDS("path.rds") los objetos RDS hay que asignarle nombre
 
 
 # Limpieza de datos NAs
 
 Usar summary y str una vez cargados para pasar a la siguiente fase.
+df$col<-NULL: nulificar una columna
 
 ### Borrado de NAs
 
@@ -198,11 +227,103 @@ FIX
 
 ### Eliminar información que falta
 
+ 3 opciones
+ 
+ a)na.omit() elimina fila
+ 
+ b)`drop_na<-c("col")` +  `df<-df1[complete.cases(df[,!names(df)%in%drop_na])]` 
+ en este caso quitamos solo los NAs de todas las cols menos las que queramos salvar
+ 
+ c)df[col]<-NULL nulificar una columna entera
+ 
+ 
 
 ### Completar información que falta
 
+imputamos valores con la libreria "Hmisc"
 
-# Corrección de datos
+con la media o mediana: `df$colwithna<-impute(df$colwithna, mean(x))`
+
+
+tip: md.pattern(df) de libreria "mice" cuando falta información para visualizar
+los datos y con la libreria "VIM" hacemos un plot agregado: aggr(df)
+
+parémetros de aggr(df):
+colores, numbers=TRUE (porcentaje datos que faltan), sortVars, labels, cex.axis,
+gap, ylab
+
+
+
+## Corrección de datos
+
+### COMBINAR Y SEPARAR DATOS
+libreria "tidyr"
+
+Previsualización: str(), head(), view(), summary()
+
+añadir columna: cbind() //crow() para añadir fila
+
+unite(): unifica varias columnas en una
+
+`df<-unite(df, col='nuevacol, col1, col2, sep="")`
+
+separate(): separa las columnas a través de un separador
+
+`df<-separate(df, col='nombrecol', into=C("col1", "col2"), sep="-")`
+
+
+### Colapsar datos en una columna
+
+función: gather(df, key='', value='', columnas)
+
+colapsa en pares de clave/valor - tablas de doble entrada
+
+
+### tablas de doble entrada a raw
+
+función: spread(df, key='columnaclave', value='columna valor')
+
+
+## Modelos predictivos para eliminar NAs: técnicas de imputación multivariante
+
+## Sustitución por muestreo aleatorio
+
+Cogeun subconjunto aleatorio de datos de la muestra y rellena los NAs con 
+valores aleatorios del subconjunto
+
+```{r multivimput, eval=FALSE}
+
+columns <- c("columnas a imputar")
+
+imputed_data <- mice(df[,names(df) %in% columns],
+                     m = 5, 
+                     maxit = 50, 
+                     method = "pmm")
+
+## pmm - comparación predictiva de medias
+## logreg - regresión logistica
+## polyreg - regresión logística politómica
+## polr - modelo de probabilidades proporcionales. 
+
+summary(imputed_data)
+
+##Modelo de datos completo, ahora completar el df original
+
+complete.data <- mice::complete(imputed_data)
+
+df$col <- complete.data$col
+df$col2 <- complete.data$col2
+
+anyNA(df)
+
+
+```
+
+
+
+### Detección de ouliers
+
+`boxplot(x)$out / boxplot(y~x)$out`
 
 ### Enmascarar outliers (IMPUTE)
 

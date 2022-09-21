@@ -11,9 +11,9 @@
 
 <meta name="author" content="Ccanadas" />
 
-<meta name="date" content="2022-09-12" />
+<meta name="date" content="2022-09-21" />
 
-<title>01-preparacion de datos</title>
+<title>03 - clasificación</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -363,288 +363,75 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">01-preparacion de datos</h1>
+<h1 class="title toc-ignore">03 - clasificación</h1>
 <h4 class="author">Ccanadas</h4>
-<h4 class="date">2022-09-12</h4>
+<h4 class="date">2022-09-21</h4>
 
 </div>
 
 
-<div id="lectura-de-datos" class="section level1">
-<h1>Lectura de datos</h1>
-<p>Usar summary y str una vez cargados para pasar a la siguiente
-fase.</p>
-<div id="datos-csv" class="section level3">
-<h3>Datos csv</h3>
-<p>read.csv(x, header= , sep=“” , dec=“” ,string.na=“” ,
-stringAsFactors=TRUE/FALSE )</p>
-<p>col.names=c(vector de nombres)</p>
-<p>castings: usar la función as.character(), as.factor(),…</p>
-<p>stringAsFactors= FALSE para que nos trate los NAs como objetos</p>
-<p>para excluir una columna o fila se usa el número en negativo</p>
+<div id="análisis-y-representaciones-para-clasificar-correctamente" class="section level1">
+<h1>Análisis y representaciones para clasificar correctamente</h1>
+<div id="matrices-de-confusión" class="section level2">
+<h2>Matrices de confusión</h2>
+<pre class="r"><code>table &lt;- table(df$observado, cp$Predicho, 
+               dnn =  c(&quot;Actual&quot;, &quot;Predicho&quot;))</code></pre>
+<p>summary(table) -test chi-sq (p-vale bajo indica dependencia entre el
+valor actual y el predicho , es decir, que es eficiente)</p>
 </div>
-<div id="datos-xml" class="section level3">
-<h3>Datos XML</h3>
-<p>libreria “XML”</p>
-<p>cmldoc&lt;-xmlParse(“url”)</p>
-<p>rootnode&lt;-xmlRoot(xmldoc)</p>
-<p>data&lt;-xmlSApply(rootnode, function(x)xmlSApply(x, xmlValue)) -
-Objeto matriz</p>
-<p>dataframe&lt;- data.frame(t(data), rown.names=NULL)</p>
-</div>
-<div id="datos-html" class="section level3">
-<h3>Datos HTML</h3>
-<p>tabla&lt;-readHTMLTable(“url”) - lista a la que podemos acceder
-con:</p>
-<p>tabla[[n]] - si conocemos la estructura a priori podemos extraer solo
-la tabla que necesitemos</p>
-<p>tabla&lt;-readHTMLTable(“url”, which=n)</p>
-</div>
-<div id="datos-json" class="section level3">
-<h3>Datos JSON</h3>
-<p>libreria “jsonlite”</p>
-<p>data&lt;-fromJSON(“url”)</p>
-<p>Acceder a los datos a través de la sintasis de $</p>
-<p>toJSON() - para convertir a JSON</p>
-</div>
-<div id="ficheros-de-ancho-fijo" class="section level3">
-<h3>Ficheros de ancho fijo</h3>
-<p>función d&lt;-read.fwf(“file”, widths=c(vectur numérico de anchuras),
-col.names)</p>
-<p>parámetros:</p>
-<p>header()</p>
-<p>sep=’ las cabeceras no respetan la anchuras</p>
-<p>skip=n -&gt; salta n lineas al inicio del fichero</p>
-<p>widths=c(-columnas a escluior)</p>
-</div>
-<div id="ficheros-.rdata-y-.rds" class="section level3">
-<h3>Ficheros .Rdata y .rds</h3>
-<p>función: remove(var) para limpiar memoria de R</p>
-<p>guardar <code>df&lt;-save(d, file=&quot;path.rdata/rds&quot;)</code></p>
-<p>rdata guarda muchas variables con nombres, puede sustituir variables
-antiguas si cargas en una sesión</p>
-<p>rds guarda el objeto pero no el nombre, más seguro</p>
-<p>cargar usar load(‘path’) - carga el fichero pero sobreescribe, con
-attach() muestra warning</p>
-<p>obj&lt;-readRDS(“path.rds”) los objetos RDS hay que asignarle
-nombre</p>
-</div>
-</div>
-<div id="limpieza-de-datos-nas" class="section level1">
-<h1>Limpieza de datos NAs</h1>
-<p>Usar summary y str una vez cargados para pasar a la siguiente fase.
-df$col&lt;-NULL: nulificar una columna</p>
-<div id="borrado-de-nas" class="section level3">
-<h3>Borrado de NAs</h3>
-<p>Borrar todas las filas que contengan NAs: df&lt;-na.omit(df)</p>
-<p>Limpieza selectiva de NAs por columna: df[!is.na(df$col),]; donde !
-es la negación booleana</p>
-<p>complete.cases(): devuelve un vector booleano de los datos que
-faltan, se usa para filtrar como alternativa al na.omit()</p>
-<p>Si tenememos un valor conocido (por ejemplo el 0), que en realidad es
-un dato erroneo como un NA, se sustituye el valor primero y luego se
-trata como NA:
-<code>{r , eval=FALSE} df$col[df$col==0]&lt;-NA</code></p>
-<p>si queremos usar cálculos sobre el dataset ignorando los NAs usar el
-parámetro na.rm=TRUE</p>
-</div>
-<div id="reemplazo-de-nas-por-la-media" class="section level3">
-<h3>Reemplazo de NAs por la media</h3>
-<pre class="r"><code>df$new_col&lt;-ifelse(is.na(df$col), 
-                   mean(df$new_col, na.rm=TRUE), 
-                   df$col)</code></pre>
-</div>
-<div id="reemplazo-por-muestra-aleatoria" class="section level3">
-<h3>Reemplazo por muestra aleatoria:</h3>
-<p>Susituye un conjunto de valores NA por una muestra simple aleatoria
-de un conjunto de valores que existan. Es decir, almacenamos los valores
-existentes en un vector y para cada valor NA dentro de ese vector se
-sustituye de manera aleatoria por un valor almacenado.</p>
-<pre class="r"><code>#x es un vector de datos que puede contener NA
-rand.impute &lt;- function(x) {
-  # missing contiene un vector de valores T/F dependiendo del NA de x
-  missing &lt;- is.na(x)
-  #n.missing contiene cuantos valores son NA dentro de x
-  n.missing &lt;- sum(missing)
-  #x.obs son los valores conocidos que tienen dato diferente de NA en x
-  x.obs &lt;- x[!missing]
-  #por defecto, devolveré lo mismo que había entrado por parámetro
-  imputed &lt;- x
-  #en los valores que faltaban, los reemplazamos por una muestra
-  #de los que si conocemos (MAS)
-  imputed[missing] &lt;- sample(x.obs, n.missing, replace = TRUE)
-  return (imputed)
-}
+<div id="análisis-de-componentes-principales---acp" class="section level2">
+<h2>Análisis de componentes principales - ACP</h2>
+<p>Reducir la dimensionalidad del problema: cambio de base de matriz de
+datos y nos quedamos con componentes que son combinación lineal de las
+anteriores. Elegimos las suficientes para tener un error aceptable.</p>
+<p>1º) calculamos varianza: apply(df,2,FUN=var) 2º) descomponer
+normalizando: acp&lt;-prcomp(df, center=TRUE, scale=TRUE) 3º) print(acp)
+- visualizacion de los pesos 4º) elegir con plot - regla del codo elegir
+con summary - cumulative proportion + 0.80 aprox 5º) representar con
+biplot: biplot(acp, scale = 0) 6º) aplicar los cambios al df original
+(prod. escalar)</p>
+<pre class="r"><code>apply(df,2,FUN=var)
 
+acp&lt;-prcomp(df, center=TRUE, scale=TRUE)
 
-##ESTA ES LA FUNCIÓN A LA QUE HAY QUE LLAMAR
-random.impute.data.frame &lt;- function(dataframe, cols){
-  names &lt;- names(dataframe)
-  for(col in cols){
-    name &lt;- paste(names[col], &quot;imputed&quot;, sep = &quot;.&quot;)
-    dataframe[name] = rand.impute(dataframe[,col])
-  }
-  dataframe
-}</code></pre>
-</div>
-<div id="limpieza-de-duplicados" class="section level3">
-<h3>Limpieza de duplicados</h3>
-<p>df&lt;-unique(df.original) : elimina filas duplicadas</p>
-<p>df&lt;-duplicated(df.original): devuelve vector booleano de
-duplicados</p>
-<p>df.original[duplicated(df.original)]: devuelve los duplicados</p>
-</div>
-</div>
-<div id="reescalado-y-normalizado" class="section level1">
-<h1>Reescalado y normalizado</h1>
-<div id="función-de-reescalado-lineal" class="section level3">
-<h3>Función de reescalado lineal</h3>
-<p>Paquete “scales”</p>
-<p>Toma una columna de un dataframe y los reescala de 0 a 1 a partir de
-la fórmula <span class="math display">\[y_i=\frac{x_i-min(x)}{max(x)-min(x)}
-\]</span></p>
-<pre class="r"><code>rescale.many &lt;- function(dataframe, cols){
-  names &lt;- names(dataframe)
-  for(col in cols){
-    name &lt;- paste(names[col], &quot;rescaled&quot;, sep = &quot;.&quot;)
-    dataframe[name] &lt;- rescale(dataframe[,col]) 
-  }
-  cat(paste(&quot;Hemos reescalado &quot;, length(cols), &quot; variable(s)&quot;))
-  dataframe
-}</code></pre>
-</div>
-<div id="función-de-normalizado" class="section level3">
-<h3>Función de normalizado</h3>
-<p>Aplica una camapana de Gauss estandarizada a las columnas del daframe
-que queramos normalizar a partir de la fórmula:</p>
-<p><span class="math display">\[Z=\frac{X-\mu}{\sigma} \]</span></p>
-<pre class="r"><code>scale.many = function(dataframe, cols){
-  names &lt;- names(dataframe)
-  for(col in cols){
-    name &lt;- paste(names[col], &quot;z&quot;, sep = &quot;.&quot;)
-    dataframe[name] &lt;- scale(dataframe[,col])
-  }
-  cat(paste(&quot;Hemos normalizado &quot;, length(cols), &quot; variable(s)&quot;))
-  dataframe
-}</code></pre>
-</div>
-</div>
-<div id="preparación-de-datos" class="section level1">
-<h1>Preparación de datos</h1>
-<div id="categorización-de-información-numérica" class="section level3">
-<h3>Categorización de información numérica</h3>
-<p>función: cut(x, breaks, labels): divide los datos numéricos en
-intervalos categorizados</p>
-</div>
-<div id="variables-ficticias" class="section level3">
-<h3>Variables ficticias</h3>
-<p>librería “dummies”: ERROR EN LA VERSIÓN</p>
-<p>Divide una columna de factores en una columna por cada nivel con
-valores 1 o 0</p>
-<p>FIX</p>
-</div>
-<div id="eliminar-información-que-falta" class="section level3">
-<h3>Eliminar información que falta</h3>
-<p>3 opciones</p>
-<p>a)na.omit() elimina fila</p>
-<p>b)<code>drop_na&lt;-c(&quot;col&quot;)</code> +
-<code>df&lt;-df1[complete.cases(df[,!names(df)%in%drop_na])]</code> en
-este caso quitamos solo los NAs de todas las cols menos las que queramos
-salvar</p>
-<p>c)df[col]&lt;-NULL nulificar una columna entera</p>
-</div>
-<div id="completar-información-que-falta" class="section level3">
-<h3>Completar información que falta</h3>
-<p>imputamos valores con la libreria “Hmisc”</p>
-<p>con la media o mediana:
-<code>df$colwithna&lt;-impute(df$colwithna, mean(x))</code></p>
-<p>tip: md.pattern(df) de libreria “mice” cuando falta información para
-visualizar los datos y con la libreria “VIM” hacemos un plot agregado:
-aggr(df)</p>
-<p>parémetros de aggr(df): colores, numbers=TRUE (porcentaje datos que
-faltan), sortVars, labels, cex.axis, gap, ylab</p>
-</div>
-<div id="corrección-de-datos" class="section level2">
-<h2>Corrección de datos</h2>
-<div id="combinar-y-separar-datos" class="section level3">
-<h3>COMBINAR Y SEPARAR DATOS</h3>
-<p>libreria “tidyr”</p>
-<p>Previsualización: str(), head(), view(), summary()</p>
-<p>añadir columna: cbind() //crow() para añadir fila</p>
-<p>unite(): unifica varias columnas en una</p>
-<p><code>df&lt;-unite(df, col=&#39;nuevacol, col1, col2, sep=&quot;&quot;)</code></p>
-<p>separate(): separa las columnas a través de un separador</p>
-<p><code>df&lt;-separate(df, col=&#39;nombrecol&#39;, into=C(&quot;col1&quot;, &quot;col2&quot;), sep=&quot;-&quot;)</code></p>
-</div>
-<div id="colapsar-datos-en-una-columna" class="section level3">
-<h3>Colapsar datos en una columna</h3>
-<p>función: gather(df, key=’‘, value=’’, columnas)</p>
-<p>colapsa en pares de clave/valor - tablas de doble entrada</p>
-</div>
-<div id="tablas-de-doble-entrada-a-raw" class="section level3">
-<h3>tablas de doble entrada a raw</h3>
-<p>función: spread(df, key=‘columnaclave’, value=‘columna valor’)</p>
-</div>
-</div>
-<div id="modelos-predictivos-para-eliminar-nas-técnicas-de-imputación-multivariante" class="section level2">
-<h2>Modelos predictivos para eliminar NAs: técnicas de imputación
-multivariante</h2>
-</div>
-<div id="sustitución-por-muestreo-aleatorio" class="section level2">
-<h2>Sustitución por muestreo aleatorio</h2>
-<p>Cogeun subconjunto aleatorio de datos de la muestra y rellena los NAs
-con valores aleatorios del subconjunto</p>
-<pre class="r"><code>columns &lt;- c(&quot;columnas a imputar&quot;)
+pc1 &lt;- apply(acp$rotation[,1]*df, 1, sum)
+pc2 &lt;- apply(acp$rotation[,2]*df, 1, sum)
 
-imputed_data &lt;- mice(df[,names(df) %in% columns],
-                     m = 5, 
-                     maxit = 50, 
-                     method = &quot;pmm&quot;)
-
-## pmm - comparación predictiva de medias
-## logreg - regresión logistica
-## polyreg - regresión logística politómica
-## polr - modelo de probabilidades proporcionales. 
-
-summary(imputed_data)
-
-##Modelo de datos completo, ahora completar el df original
-
-complete.data &lt;- mice::complete(imputed_data)
-
-df$col &lt;- complete.data$col
-df$col2 &lt;- complete.data$col2
-
-anyNA(df)</code></pre>
-<div id="detección-de-ouliers" class="section level3">
-<h3>Detección de ouliers</h3>
-<p><code>boxplot(x)$out / boxplot(y~x)$out</code></p>
+#si necesitamos más, añadir pc_i</code></pre>
 </div>
-<div id="enmascarar-outliers-impute" class="section level3">
-<h3>Enmascarar outliers (IMPUTE)</h3>
-<p>Imputa los valores por debajo del cuantil 5% por la media y los que
-estén por encima del 95% por la mediana</p>
-<pre class="r"><code>impute_outliers &lt;- function(x, removeNA = TRUE){
-  quantiles &lt;- quantile(x, c(0.05, 0.95), na.rm = removeNA)
-  x[x&lt;quantiles[1]] &lt;- mean(x, na.rm = removeNA)
-  x[x&gt;quantiles[2]] &lt;- median(x, na.rm = removeNA)
-  x
-}</code></pre>
+<div id="diagramas-roc" class="section level2">
+<h2>Diagramas ROC</h2>
+<p>library(ROCR)</p>
+<p>Fiabilidad en nuestra clasificación: p=[0,1]</p>
+<p>1º) generar objeto de predicción 2º) generar objeto de performance
+3º) grafico curva ROC + diagonal (peor caso) 4º) generar objeto de corte
+/umbral-A partir de qué valores obtendo un verdadero positivo 5º)
+escoger la probabilidad de corte para comprar con el objeto que nos
+llega</p>
+<pre class="r"><code>predict&lt;-prediction(y,x)
+
+perf&lt;-performance(predict, &quot;tpr&quot;, &quot;fpr&quot;)
+
+plot(perf)
+lines(par()$usr[1:2], par()$usr[3:4])
+
+prob.cuts &lt;- data.frame(cut = perf@alpha.values[[1]],
+                          fpr = perf@x.values[[1]],
+                          tpr = perf@y.values[[1]])
+
+prob.cuts[prob.cuts$tpr&gt;=0.8,]</code></pre>
+<p>con categorías, ordenar las etiquetas con label.ordering=c(“no”,
+“si”) en la predicción.</p>
 </div>
-<div id="enmascarar-outliers-replace" class="section level3">
-<h3>Enmascarar outliers (REPLACE)</h3>
-<p>Capping: sustituye los outliers por valores que estén en los extremos
-de los bigotes</p>
-<pre class="r"><code>replace_outliers &lt;- function(x, removeNA = TRUE){
-  qrts &lt;- quantile(x, probs = c(0.25, 0.75), na.rm = removeNA)
-  caps &lt;- quantile(x, probs = c(.05, .95), na.rm = removeNA)
-  iqr &lt;- qrts[2]-qrts[1]
-  h &lt;- 1.5 * iqr
-  x[x&lt;qrts[1]-h] &lt;- caps[1]
-  x[x&gt;qrts[2]+h] &lt;- caps[2]
-  x
-}</code></pre>
 </div>
+<div id="clasificadores" class="section level1">
+<h1>Clasificadores</h1>
+<p>El método a seguir es siempre el mismo: 1º) creamos la partición de
+los datos 2º) generamos un modelo con el tr.id (y val.id) 3º) validamos
+el modelo con el conjunto testing (test.id) 4º) Comprobamos la eficacia
+con matriz de confusión y/o diagrama ROC</p>
+<div id="arboles-de-clasificación" class="section level2">
+<h2>Arboles de clasificación</h2>
 </div>
 </div>
 

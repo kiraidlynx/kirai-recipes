@@ -1,0 +1,225 @@
+---
+title: "02-Análisis exploratorio"
+author: "Ccanadas"
+date: "2022-09-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Análisis exploratorio inicial
+
+summary() y str()
+casting: data~col<-factor(data$col, levels=c(), labels=c())
+
+### Cálculos estadísticos básicos
+
+mean(x), median(x), quantile(x), var(x), sd(x)
+
+moda<-mfv(x) del paquete modeest
+
+coef.var<-cv(x) del paquete raster (variabilidad relativa entre la media y sd)
+
+Medidas de simetría: asimetría<- skewness(x) y curtosis<-kurtosis(x)
+
+
+
+
+# División de los datos
+
+### Manual
+
+extraer subconjuntos con subdf<-df[i:k,c(1,4)]: pueden ser consecutivos,
+valores concretos con vector o todos excepto valores concretos restando vector.
+es mejor especificar columnas con variables string por si cambia el orden del df.
+
+extraer con filtros: subdf<-df[cond fila, cond columna]
+
+
+### Automático
+
+con la función subset(df, condiciones, select=c(columnas))
+
+ej: !names(data)%in%c(columnas) objetos fuera de los seleccionados
+ej2: x%in%c(cols) objetos dentro 
+
+
+### Función split
+lista<-split(data, data$col): separa variables categóricas por nivel en columnas
+también existe la función unsplit, a la lista se accede por $ o por [[]]ç
+
+
+## Partición de datos en conjuntos train,val,test
+Conjunto train: entrenamiento del modelo
+Conjunto val: configurar parámetros del modelo durante el entrenamiento
+Conjunto test: probar el modelo
+
+library(caret)
+
+
+### 2 particiones
+
+Trabajamos con los índices de los conjuntos, no con los valores
+
+
+
+```{r, eval=FALSE}
+tr.ids<-createDataPatition(df$col, p=0.8, list=FALSE)
+data.train<-df[tr.ids,]
+data.val<-<-df[-tr.ids,]
+```
+
+
+### Para 3 particiones
+
+
+```{r, eval=FALSE}
+tr.ids <- createDataPartition(df$col, p = 0.7, list = F)
+data.train<- df[tr.ids,]
+temp <- df[-tr.ids,]
+val.ids<- createDataPartition(temp$col, p = 0.5, list = F)
+data.val <- temp[val.ids2,]
+data.test <- temp[-val.ids,]
+```
+
+### FUNCIÓN AUTOMATIZAR
+
+```{r training}
+
+##FUNCIÓN DE PARTICION EN 2 SUBSETS
+
+rda.cb.partition2 <- function(dataframe, target.index, prob){
+  library(caret)
+  training.ids <- createDataPartition(dataframe[,target.index], p=prob, list = FALSE)
+  list(train = dataframe[training.ids,], val = dataframe[-training.ids,])
+}
+
+##FUNCIÓN DE PARTICIÓN EN 3 SUBSETS
+
+rda.cb.partition3 <- function(dataframe, target.index,
+                              prob.train, prob.val){
+  library(caret)
+  training.ids <- createDataPartition(dataframe[,target.index], p = prob.train, list = FALSE)
+  train.data <- dataframe[training.ids,]
+  temp <- dataframe[-training.ids,]
+  validation.ids <- createDataPartition(temp[,target.index], p = prob.val, list = FALSE)
+  list(train = train.data, val = temp[validation.ids,], test = temp[-validation.ids,])
+}
+
+```
+
+Para extraer una muestra aleatoria usamos la función:
+
+sample(df o col, elementos que queremos, replace=TRUE/FALSE)
+
+
+
+# Representación de datos
+
+## Representación gráfica
+
+Histogramas: añadir funcion densidad con lines(density)+frec. relativas con prob=T
+
+Boxplots: diagrama de cajas y bigotes
+
+
+
+### Scatter plot
+
+Scatterplots: resumen de parámetros al RMD
+
+añadir abline(lm) para visualizar la linea de tendencia
+
+mejor hacer matriz de scatters cruzando a pares con:
+
+`pairs(~, var1+var2+..+varn)`
+
+
+Una vez pintado y con el lm ajustado, podemos agregar colores por factor con
+
+with(subset(df, factor=="level"), points(x,y, col="color)) - encadenar esta
+secuencia para cada factor
+
+
+Para hacer una matriz de plots:
+
+par(mfrow=c(filas,columnas)) - rellena hacia la derecha
+par(mfcol=c(filas,columnas)) - rellena hacia abajo
+
+
+Recordad restaurar par(old.par) al acabar.
+
+
+
+## Paquete lattice
+
+library(lattice)
+
+bwplot(y~x|z, data=df) -boxplot
+
+xyplot(y~x|z, data=df) -scatterplot
+
+Parámetros: captions
+
+También existen los densityplot y splom
+
+
+### Relaciones entre variables: esquemas de colores
+
+trellis.par.set( theme= , )
+aspect=n
+layout=c(filas, columnas) - margen
+
+### beanplot y análisis de causalidad
+library(beanplot)
+
+beanplot(y~x, color)
+
+```{r causalidad, eval=FALSE}
+
+library(lattice)
+bwplot(y ~ x, data = data, 
+       layout = c(1,1), 
+       xlab = "x_data",
+       ylab = "y_data",
+       panel = function(x,y,...){
+         panel.bwplot(x,y,...)
+         panel.stripplot(x,y,jitter.data = TRUE,...)
+       },
+       par.settings = list(box.rectangle = list(fill = c('red', 'yellow', 'green'))))
+```
+
+
+
+## Técnica de validación cruzada
+
+Teoría: iteraciones eligiendo distintos training.set para cada iteracción, 
+devuelve resultados estadísticos independientes de los subconjuntos de entrenamiento
+USO EN CLASIFICADORES.
+
+k-fold cross validation
+
+
+## Gráficos Q-Q
+
+Representa los cuantiles del dataset frente a los quantiles de una distribución.
+
+Para que los datos encajen en una distribucción Q-Q linea.
+
+qqnorm(vector) - comparación con distrib normal (qnorm(vector))<-sample
+
+qqplot(y,x) - (y- teórico / x-muestra)
+
+y<-sample de datos creados a partir de una distribución <- qunif(ppoints(length(x)))
+(también con qnorm, qchisq (grados de libertad df=n), q.....)
+
+
+
+
+
+
+
+
+
