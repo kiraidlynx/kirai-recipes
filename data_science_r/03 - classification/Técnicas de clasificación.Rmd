@@ -96,29 +96,282 @@ El método a seguir es siempre el mismo:
 1º) creamos la partición de los datos 
 
 
-2º) generamos un modelo con el tr.id (y val.id)
+2º) generamos un modelo con el tr.ids (y val.ids)
 
 
-3º) validamos el modelo con el conjunto testing (test.id)
+3º) validamos el modelo con el conjunto testing (test.ids)
 
 
 4º) Comprobamos la eficacia con matriz de confusión y/o diagrama ROC
 
+4.1) Para conjunto TRAIN+TEST
 
 
-## Arboles de clasificación
+```{r CM_mod, eval=FALSE}
+
+#Matriz de confusión
+
+pred.mod<-predict(mod, df[-tr.ids,], type="class")
+
+table <- table(df[-tr.ids]$col_y, pred.mod, 
+               dnn =  c("Actual", "Predicho"))
+
+```
+
+
+```{r test_df, eval=FALSE}
+
+##En lugar de matrices de confusión: añadir las predicciones al DF original
+
+df[tr.ids, "Pred"] <- predict(mod, df[tr.ids, cols_x])$col_y
+
+table(df[tr.ids, "col_y"], df[tr.ids, "Pred"], dnn = c("Actual", "Predichos"))
+
+df[-tr.ids, "Pred"] <- predict(mod, df[-tr.ids, cols_x])$col_y 
+table(df[-tr.ids, "col_y"], df[-tr.ids, "Pred"], dnn = c("Actual", "Predichos"))
+
+```
+
+
+
+```{r ROC_mod, eval=FALSE}
+
+#Diagrama ROC
+
+pred.mod<-predict(mod, df[-tr.ids,], type="prob")
+
+pred<-prediction(pred.mod[,2], df[-tr.ids, "nombre_col_y"])
+
+perf<-performance(pred,"tpr", "fpr")
+
+plot(perf)
+
+```
+
+
+4.1) Para conjunto TRAIN+VAL+TEST
 
 
 
 
 
 
+## Modelos
+
+### Arboles de clasificación
+
+library(rpart), library(rpart.plot)
+
+```{r tree, eval=FALSE}
+
+#Modelo árbol
+
+mod<-rpart(y~., data=df[tr.ids,], method="class", control=rpart.control(minstplit=20, cp=0.01))
+
+
+```
+
+
+método class= método de clasificación
+
+rpart.control dentro de una variable de control: minsplit=n nodos con n casos en su interior, tiene en cuenta como nodo solo si tienen no más elementos
+
+cp=complejidad
+
+
+```{r treeplot, eval=FALSE}
+
+#Diagrama de árbol
+
+prp(mod, type=2, extra=104, nn=TRUE, fallen.leaves=TRUE, faclen=4, varlen=8, shadow.col="gray")
+
+
+
+```
+
+type: split debajo + etiquetado; configuración del tipo
+
+extra: prob de cada clase en el nodo casos en los que caemos en %
+
+nn: nº del nodo
+
+fallen leaves: nodos finales abajo del todo en true
+
+faclen y varlen la longitud del nombre del factor y la variable
+
+los niveles de complejidad son el número de niveles del árbol, tenemos que quedarnos con lo que explique la mayor parte de los datos pero no al completo para evitar overfitting
+
+
+#### Poda del árbol
+
+mod$cptable: datos de las componentes principales: escogemos las CP con error más bajo para que el árbol no se ajuste demasiado al modelo de entrenamiento
+
+truco: error min + desv. standar de la columna de la CP > error de la columna de la CP
+
+```{r treepruned, eval=FALSE}
+
+mod.pruned<-prune(mod, mod$cptable[n,"CP"])
+
+#n es el número de componentes principales
+```
+
+Comprobar nuestro modelo
+
+
+### Bosque aleatorio
+
+library(randomForest)
+
+1º) hay que convertir clase en factor
+2º) no hace falta subdividir conjuntos, el algoritmo lo hace solo
+
+```{r randomforest, eval=FALSE}
+
+mod<-randomForest(x=df[,-col_y], y=col_y, ntrees=500, keep.forest=TRUE)
+
+```
+
+
+### Maquinas de soporte virtual (SVM)
+
+library(e1071)
+
+
+```{r SVM, eval=FALSE}
+#Modelo
+mod<-svm(y~., df=df[tr.ids,])
+
+##Parámetros COST Y GAMMA: elegir con tuned
+
+  
+##Hacer PRED Y TABLE
+
+#PLOT
+
+plot(mod, data = df[tr.ids,], y ~ x)
+plot(mod, data = df[-tr.ids,], y ~ x)
+
+# Método para optimizar el coste y gamma
+
+tuned <- tune.svm(y ~ ., data = df[tr.ids,], 
+                  gamma = 10^(-6:-1), cost = 10^(1:2))
+summary(tuned)
+  
+  
+```
+
+
+Teoría: asignar un vector de pesos con class.weights=c()
+
+COMPROBAR DESVIACION PREVIA
+
+
+
+### Naive Bayes
+
+Para pocos datos
+
+
+```{r NV, eval=FALSE}
+
+mod<-naiveBayes(y~.x, data=df[tr.ids,])
+```
+
+
+
+### K-nearest neighbors
+
+1º) Hay que escalar primero las variables: col<-scale(col)
+
+2º)partir el conjunto de datos en 3 (train, validation, test)
+
+3º) usar función con los conjuntos divididos
+
+
+
+```{r knn auto, eval=FALSE}
+
+knn.automate <- function(tr_predictors, val_predictors, tr_target,
+                         val_target, start_k, end_k){
+  for (k in start_k:end_k) {
+    pred <- knn(tr_predictors, val_predictors, tr_target, k)
+    tab <- table(val_target, pred, dnn = c("Actual", "Predichos") )
+    cat(paste("Matriz de confusión para k = ",k,"\n"))
+    cat("==============================\n")
+    print(tab)
+    cat("------------------------------\n")
+  }
+}
+
+
+#Automatizar la elección de k
+
+trcntrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
+caret_knn_fit <- train(y ~ ., data = df,
+                       method = "knn", trControl = trcntrl,
+                       preProcess = c("center", "scale"),
+                       tuneLength = 10)
+
+
+caret_knn_fit
+
+```
+
+
+
+### Redes neuronales
+
+library(nnet)
+
+```{r nnet , eval=FALSE}
+
+mod<-nnet(y~., data=df[tr.ids,], size=3, maxit=10000, decay=.001, rang=0.5)
+
+#na.action=na.omit
+#curvas ROC con predict type="raw"
+
+```
+
+size=tamaño de la capa interna~ promedio (unidades entrada / unidades salida)
+decay=controlar el overfitting
+rang=rango de pesos inidicales (REGLA DE ORO: rang*max valor del dataset ~1)
+
+
+
+### Análisis del discriminante lineal
+
+library(MASS)
+
+Análisis de varianza y regresión: la var. dependiente como combinación lineal del resto de medidas
+
+
+```{r LDA , eval=FALSE}
+
+mod<-lda(y~., data=df[tr.ids,])
+
+```
 
 
 
 
+### Regresión logística
+
+library(stats)
+El dataset para la regresión logística tiene que tener las variables de salida [0,1]
+las variables indep: categóricas binarias
 
 
 
+
+```{r logregr, eval=FALSE}
+
+mod<-glm(y~., data=df[tr.ids, ], family=binomial)
+
+##Para decidir el cutoff (0.5 en este ejemplo)
+
+df[-tr.ids, "pred_50"]<-ifelse(df[-tr.ids,"prob_success"]>=0.5, 1,0)
+
+
+```
 
 

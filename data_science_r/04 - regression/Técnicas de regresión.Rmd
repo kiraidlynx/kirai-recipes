@@ -1,0 +1,157 @@
+---
+title: "05 - regression"
+author: "Ccanadas"
+date: "2022-09-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Evaluar el error
+
+rmsr<-sqrt(mean(x_obs-x_pred)^2)
+plot(x_obs, x_pred)
+abline(0,1)
+
+## knn regresión
+
+library(dummies)
+library(FNN)
+library(scales)
+library(caret)
+
+1º) categorías por factores a través de dummies (necesitamos variables numéricas)
+2º)estandarizar predictores con rescale
+3º) partición de datos
+
+
+```{r}
+t.id <- createDataPartition(df$y_col, p=0.6, list = F)
+tr <- df[t.id, ]
+temp <- df[-t.id, ]
+v.id <- createDataPartition(df$y_col, p=0.5, list = F)
+val <- temp[v.id,]
+test <- temp[-v.id,]
+```
+
+
+
+4º)construir modelos para distintos k y evaluar a través del rmse
+
+```{r knn_manual, eval=FALSE}
+
+reg <- knn.reg(tr[,cols_x], val[,cols_x], tr$col_y, k=n,
+                algorithm = "brute")
+rmse <- sqrt(mean((reg$pred-df$col_y)^2))
+
+```
+
+
+
+5º) plot (rmse para cada K) y aplicar el óptimo al conjunto testing
+
+`rmse1 <- sqrt(mean((df$pred-df$col)^2))`
+
+errors = c(rmse1, rmse2, rmse3, rmse4)
+
+plot(errors, type = 'o', xlab = "k", ylab = "RMSE")
+
+
+
+
+## Funciones para automatizar el knn
+
+```{r knn_reg, eval=FALSE}
+
+##Función para automatizar KNN
+rda.knn.reg <- function(tr_predictor, val_predictors,
+                          tr_target, val_target, k){
+  library(FNN)
+  res <- knn.reg(tr_predictor, val_predictors,
+                 tr_target, k, algorithm = "brute")
+  rmserror <- sqrt(mean((val_target - res$pred)^2))
+  cat(paste("RMSE para k = ", toString(k), ": ", rmserror,"\n", sep = ""))
+  rmserror
+}
+
+##Función para realizar múltiples KNN
+rda.knn.reg.multi <- function(tr_predictors, val_predictors,
+                                tr_target, val_target, start_k, end_k){
+  rms_errors <- vector()
+  for(k in start_k:end_k){
+    rms_error <- rdacb.knn.reg(tr_predictors, val_predictors,
+                               tr_target, val_target, k)
+    rms_errors <- c(rms_errors, rms_error)
+  }
+  plot(rms_errors, type = 'o', xlab = "k", ylab = "RMSE")
+}
+
+```
+
+
+## Regresión lineal
+
+```{r lm, eval=FALSE}
+
+mod<-lm(y~., data=df[tr.ids,])
+
+#pintar el modelo
+
+par((mfrow)=c(2,2))
+plot(mod)
+
+#Teoría de la representacion
+```
+
+
+Factor de referencia: df<-within(df, col<-relevel(col,ref="nivel)): utilizar la que tenga más elementos
+
+Función STEP: libr(MASS); step.model<-stepAIC(mod, direction="backwards"): selecciona variables más importantes a partir de las CP
+
+(REPASO)
+
+# Métodos de regresión avanzados
+
+## Árbol de regresión
+library(rpart), library(rpart.plot)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
