@@ -1,0 +1,240 @@
+---
+title: "05 - clustering"
+author: "Ccanadas"
+date: "2022-09-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Técnicas de reducción de datos
+
+1º) Normalizar y escalar los datos numéricos
+
+Los datos categóricos hay que pasarlos a factor:
+
+data<-as.data.frame(scale(df[,]))
+`data$factor<-df$col_factor`
+
+Indexar los nombres del factor:
+rownames(data)=data$factor
+
+
+# Clustering jerárquico
+
+hc$merge: para cada cluster, enlace entre grupos después de la primera unión por distancia, elige una nueva distancia de grupo.
+
+ETIQUETAS DESPUÉS DE LA PRIMERA DIVISIÓN
+
+Métodos:
+single: min (distancia)
+complete: max (distancia)
+average: media (distancia)
+ward.D2: varianza (distancia)
+
+Usualmente usamos distancia euclidea para los datos normalizados.
+
+## Aglomerativo 
+
+método: hc<-hclust(dist(data, method="euclidean"), method=ward.D2)
+
+dendograma: plot(hc, hang=-0.01, cex=0.7)
+
+
+## Divisivo
+
+library(cluster)
+
+dv<-diana(data, metric="euclidean")
+
+plot(dv)
+
+corte para separar a una altura: fit<-cutree(hc, k=n) (si queremos n grupos por ej.)
+
+table(fit): discusión (salen los grupos)
+
+se puede representar por cajas: rect.hclust(hc, k=n, border="color") :añadido al plot(dv)
+
+
+
+
+# Cluster partitivo con k-means
+
+prototipo: n observaciones en k clusters, cada observación pertenece al cluster con promedio más cercano (algoritmo más rápido)
+
+método sensible a los outliers si hay muchos datos
+
+1º) normalizar y escalar los datos
+
+2º) 
+
+library(devtools)
+devtools::install_github("kassambara/factoextra")
+
+Librería MUY IMPORTANTE PARA REPRESENTACIÓN
+
+3º) km <- kmeans(df.scaled,n)
+
+
+4º) media por grupo:
+
+aggregate(df.scaled, by = list(cluster = km$cluster), mean)
+
+
+5º) representación:
+
+library(factoextra)
+fviz_cluster(km, data = protein.scaled)
+
+
+# Clustering avanzado
+
+## k-medoids clustering
+
+variante del k-means aplicada a mediodes. un mediode es el objeto del grupo que más lo representa o está más centrado (el lider)
+
+library(cluster), library(factoextra)
+
+kmed<-pam(df.scaled, n) //Partition Around Medoid
+
+
+## Clustering large application (clara)
+
+para datasets muy grandes de más de 1k observables
+
+clarafit<-data(df.scaled, n, samples=m)
+
+donde m es el tamaño de la muestra (son interaciones sobre muestras dentro del conjunto de datos)
+
+
+
+# Validación del clustering
+
+
+técnicas de validatción: librería: fcp, NbClust, factoextra, cluster
+
+1º) elección de k: mejor número de cluster: regla de la mayoría
+¿Qué K divide mejor los datos?
+
+
+nb<-NbClust(df.scaled, dist="euclidean",min.nc = 2, max.nc = 12, 
+              method = "ward.D2", index = "all"))
+
+
+(min,max= rango de clusters a crear)
+
+REPRESENTACIÓN: histograma
+
+fviz_nbclust(nb) + theme_minimal()
+
+
+2º) hacer el k-means sobre el k óptimo
+
+km.res<-kmeans(df.scaled, k=óptimo)
+
+
+3º) análisis de silueta:
+
+` sil.km<-silhouette(km.res$cluster, dist(df.scaled))`
+
+hacer un summary y pintar silueta con:
+
+fviz_silhouette(sil.km)
+
+
+INTERPRETACIÓN: médidas entre -1 y +1 de cómo de bien están clasificados mis datos, si es negativo o más cercano a -1 es que están mal clasificados y podrían estar en otros grupos, si es positivo o cercano a uno, se ha realizado una buena clasificación
+
+
+
+4º) matriz de distancias: dd<-dist(df.scaled, method="euclidean")
+
+km_stats<-cluster.stats(dd, km.res$cluster)
+
+estadísticas importantes: TEORÍA
+-within.vluster.ss
+-clus.avg.silhouettes
+-dunn
+
+
+5º) usar distintos algoritmos de clustering y compara coeficientes de dunn (objetivo: maximizarlo)
+
+6º) parámetro: corrected.ran y vi: TEORÍA
+
+
+# Técnicas de clustering avanzadas
+
+
+## Clustering basado en densidad de puntos
+
+
+library(fpc)
+
+clasificar puntos del dataset: fundamentales, bordes o ruido cuando los datos forman figuras que no pueden ser clasificadas por clusters esféricos o tienen formas y ruido
+
+dsfit<-dbscan(data, eps=0.15, MinPts=5)
+
+Para figuras no lineales, eps: radio más pequeño entre datos del df y MinPts el numero mínimo de puntos aglomerados que pueden considerarse un cluster.
+
+frontera: vecinos<minpts
+ruido: marginales, d<eps
+
+REPRESENTACION:
+
+fviz.cluster(dsfit, data, geom=points")
+
+
+## Clusters basados en modelos: técnica de máxima expectación
+
+library(mclust): número de clusters que tenemos que llevar a cabo
+
+mclust<-Mclust(data): da varios modelos
+
+plot(mclust)
+
+Teoría: BIC, clasific., uncertain, density
+
+summary(mclust)
+
+
+## REDUCIR DIMENSONES CON ACP
+
+library(corrplot)
+
+1º) matriz de correlaciones: corr<-corr(df[,cols_x])
+                              corrplot(corr, method="color")
+                              
+                              
+2º) df_acp<-prcomp(df[,cols_x], scale=T)
+
+Hay que quitar la columna TARGET, el scale en false da la matriz de covarianza
+
+3º) quedarme con N comp. principales.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,179 @@
+---
+title: "06 - timeseries"
+author: "Ccanadas"
+date: "2022-09-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Objeto tipo Time-Series
+
+DF: stringAsFactor=F para tener tipo string y poder convertir la fecha a tipo date
+
+`df$date=as.Date(df$date)`
+
+library(quantmood) para datos a tiempo real:
+
+getSymbols("name"): plot (barchart, chartseries)
+
+
+#Formato tipo fecha
+
+as.Date("string fecha", format="formato")
+
+as.numeric(fecha): pasar fecha a dato numérico
+
+Componentes:
+
+as.Date(n, origin=as.Date("fecha"))
+format(dt, "%Y"): devuelve solo una parte de la fecha
+months(): devuelve el mes
+weekdays(): devuelve el día de la semana
+quarters(): devuelve el cuatrimestre del año
+
+
+
+# Operaciones y secuencias de fechas
+
+dt<-fecha objeto: se puede sumar, restar días, comparar valores, etc
+
+seq(dt1,dt2, "intervalo")
+seq(from:ft1, by="intervalos temporales", length,out=n)[i] :quedarte con el elemento de una secuencia
+
+
+# Análisis preliminar de time-series
+
+1º) función d<-diff(column, lag=2): computa diferencias de un dato al siguiente
+
+2º) representar diff en histograma+matriz densidad
+
+3º) convertir a formato ts<-ts(df$col)
+
+4º)df.return<-d/lag(as.numeric(ts), k=-1): incremento porcentual respecto al punto anterior
+
+
+# Objeto serie temporal
+
+se crean objetos ts aunque no contengan fechas
+
+s.ts<-ts(data, start=PARAM, frecuency=4,12,365...)
+
+funciones: start, end, free (documentación)
+
+plot(ts): te separa directamente los plots en el número de columnas
+
+plot(ts, plot.type="single", col=1:n) + legend() // junta los plots en una sola gráfica.
+
+
+
+# Descomposición de serie temporal
+
+1º) seleccionar serie aplicando log: d<-log(df[,n])
+2º)descomposición mediante función (SUBCATERGORIAS)
+3º) representación:
+
+plot(d.stl) :: divide el gráfico en cada una de los elementos descompuestos de la ts
+
+## STL: descomposición seassonal
+
+d.stl<-stl(d, s.window="period") ##toma el periodo original de la ts
+
+
+## Moving Average 
+
+d.dec<-decompose(d)
+
+
+# Filtrado
+
+Suavizar mediante el método moving average: promedio con respect a los datos correlativos
+sirve para suavizar la tendencia
+
+definir periodo
+
+n<-
+
+definir pesos
+
+weights<-rep(1/n)  (7 para datos semanales, 12 para anuales, según vengan los datos)
+
+
+filtrado bilateral: coge los anteriores y los siguientes:
+
+`s.fil1<-filter(s$col, filter=weights, sides=2)`
+
+filtrado unilateral: coge solamente los anteriores:
+
+`s.fil2<-filter(s$col, filter=weights, sides=1)`
+
+
+# Suavizado y predicción
+
+1º) crear serie temporal ts<-ts(df$col, start=c(), frecuency=)
+visualizar+plot
+
+
+2º)suavizado exponencial Holt-Winter
+
+ts.hw<-HoltWinters(ts)
+
+
+3º) representar la ts:
+
+plot(ts.hw, col="blue", col.predicted="red")
+
+parámetros adicionales de ts.how$
+
+SSE, alpha, beta, gamma
+fitted: valores ajustados (xhat)
+
+4º) predicciones en base al modelo:
+
+ts.fore<-forecast(ts.hw, h=numero de puntos a predecir)
+plot(ts.fore)
+
+Intervalos de confianza del 80 y 95%: acceder mediante $lower o upper
+
+
+
+
+# Modelo autorregresivo
+
+
+1º) crear ts
+2º)ts.arima<-auto.arima(ts)
+3º)summary(ts.arima)
+4º) predicción: ts.fore<-forecast(ts.arima, h=horizonte)
+
+plot(ts.fore, fcol="color") ##bueno para predicción a corto/medio plazo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

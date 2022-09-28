@@ -1,0 +1,158 @@
+---
+title: "07 - ggplot2"
+author: "Ccanadas"
+date: "2022-09-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+ library(ggplot2)
+ 
+ 1º) DATOS
+ 2º) GEOM: geometrías (tipo de gráfico)
+ 3º) Estéticas: aes (color, tamaño, forma, posición,...)
+ 4º) Factor de escala: scale (información más allá de los datos)
+ 
+ Ir añadiendo a partir de + las personalizaciones
+ 
+# Gráficos de dispersión
+
+inicializar gráfico:
+plot<-ggplot(df, aes(x,y))
+
+añadir capas: 
+plot+geom_point()
+plot+geom_point(alpha=.5, size=5, aes(color=factor(factor_col))) ##Añadir colores por factor +
+     geom_smooth(method="lm", se=FALSE, col="green") +
+     
+     ##se=TRUE pinta el intervalo de confianza
+     
+más opciones de representación:
+facet_grid(y(factor)~.) ##Representar gráficos separados por factor (podemos hacer .~y para trasponer)
+theme_bw(base_family="Arial", base_size=10)  ##tema (familia de fuentes)
+labs(x="xlab")+labs(y="ylab)  ##etiquetas
+labs(title="titulo")
+
+     ##facet_wrap: añadir más dimensiones al gráfico: envolver los gráficos en filas y columnas coherentes
+ 
+qplot<-versión simplificada de ggplot2
+
+ej: qplot(x=x, y =y , data = df,
+      geom=c("point", "smooth"), method = "lm", 
+      formula = y~x, color = factor, 
+      main = "titulo")
+
+
+#Gráficos de líneas
+ 
+plot<-ggplot(df, aes(x,y))
+plot+geom_line()
+plot+geom_line(linetype="dashed")
+plot+geom_line(color="color")
+
+parámetros: tamaño, tipo , etc.. (podemos utilizar los parámetros dentro del mismo geom_line)
+
+plot+geom_line(aes(color=as.factor(columna)))  agrupar lineas por color/categoría
+
+
+
+
+# Gráfico de barras
+ 
+library(dplyr) ##instrucciones bases de datos 
+
+1º) crear un df que resuma la información (variables de conteo)
+ 
+ df.sum=df%>%
+ group_by(factor1, factor2)%>%
+ summarize(variable_de_conteo=sum(cnt))
+ 
+ df.sum
+ 
+ 2º) plot
+ 
+ ggplot(df.sum, aes(x=x, y=y, fill=otra_variable, label=scales::comma(variable_conteo)))+ ##fill, separa por colores otro factor
+ geom_bar(show.legend=T, stat="identity, fill="color", colour="black")+ ##stat identity muestra que la Y es una col del dataset/stat=bin si no lo es
+ labs(title="titulo")+
+ scale_y_continuous(labels=scales::comma)+ ##etiquetas dentro de las cajas
+ geom_text(size=3, position=position_stack(vjust=0.5)) ##formato etiquetas
+ 
+ 
+ 
+# Gráficos de distribuciones
+ 
+plot<-ggplot(df, aes(x=x_var)) 
+plot+geom_histogram() + ##frec. absolutas
+plot+geom_histogram(binwidth=5, fill="color", colour="black") + ##número de divisiones/anchura division
+
+Para representar la función de densidad:
+
+1º) cambiar a frec. relativas
+
+ggplot(df, aes=(x=x, y=..density..))+
+geom_histogram(fill="cornsilk", color="grey6", size=.2)+
+
+2º) añadir la función de densidad
+
+geom_density()+xlim(n,m) ##para ajustar la línea de densidad y suavizar los límites
+
+
+
+# Gráficos de mosáicos
+
+Concurrencia de probabilidades condicionales
+
+library(stats)
+
+mosaicplot(~var1+var2, data=df, color=n:m o color=T, las=1)
+
+solo hay que aplicar las variables que vamos a cruzar y las columnar en el vector de color
+
+
+# Treemaps
+
+library(treemap)
+
+1º) construir un df ramificado: variables categóricas y un valor
+
+branch <- c(rep("branch-1",4), rep("branch-2",2), rep("branch-3",3))
+subbranch <- paste("subbranch",c(1,2,3,4,1,2,1,2,3), sep = "-")
+values = c(15,4,22,13,11,8,6,1,25)
+data <- data.frame(branch, subbranch, values)
+
+treemap(data, index = c("branch", "subbranch"),
+        vSize = "values", type = "index")
+
+
+2º) a partir de un df
+
+treemap(df, 
+        index = c("var_1", "var_2"),
+        vSize = "var_value", type = "index")
+
+
+# Gráficos con matrices de correlación
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+
