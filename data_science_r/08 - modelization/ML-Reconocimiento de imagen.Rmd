@@ -1,0 +1,120 @@
+---
+title: "08.2 - Introducción al Machine Learning"
+author: "Ccanadas"
+date: "2022-09-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Aplicación de ML para reconocimiento de imágenes
+
+### INSTALACIÓN DE REPOSITORIOS y LIBRERIAS
+
+repos <- getOption("repos")
+repos["mxnet"]<-"https://s3.amazonaws.com/mxnet-r"
+repos
+options(repos = repos)
+install.packages("mxnet") #no disponible para R actualizado
+install.packages("jpeg")
+install.packages("png")
+
+Instalar libreria desde github y conectarse a biocLite (opensource de bioinformatica)
+
+library(devtools)
+devtools::install_github("rich-iannone/DiagrammeR")
+source("http://bioconductor.org/biocLite.R")
+biocLite()
+biocLite("EBImage")
+
+
+library(mxnet) #libreria de deep learning: entrena e implementa redes neuronales profundas
+library(png)
+library(jpeg)
+library(EBImage) #librería de procesamiento de imagen
+
+Descarga de red neuronal entrenada:
+
+if(!file.exists("PATH_FILE")){
+  download.file("http://data.dmlc.ml/mxnet/models/imagenet/inception-bn.tar.gz",
+                destfile = "../data/tema8/inception-bn.tar.gz")
+  untar("../data/tema8/inception-bn.tar.gz",
+        exdir = "../data/tema8/")
+  file.remove("../data/tema8/inception-bn.tar.gz")
+}
+
+
+Paso omitido: entrenar una red neuronal con algoritmos de ML
+
+## Cargar la librería entrenada
+
+Creamos un modelo de la red neuronal: cargamos un modelo de parámetros de decisión del fichero de la red neuronal
+
+model <- mx.model.load("../data/tema8/Inception-BN", iteration = 126)
+
+Lectura del txt donde están clasificadas las categorías (ID - respuesta de la red neuronal, OBJETO )
+
+synsets <- readLines("../data/tema8/synset.txt")
+
+
+Comprobamos el modelo con imágenes para validar:
+
+elephant <- readImage("../data/tema8/elephant.jpg")
+kangaroo <- readImage("../data/tema8/kangaroo.jpg")
+leopard <- readImage("../data/tema8/leopard.jpg")
+
+
+
+## Funciones de pre_procesamiento de imagen y clasificación
+
+Normalizar la imagen a los parámetros de la red neuronal
+
+preproc.image <- function(image, isPng = F){
+  n_channels = 3
+  if(isPng){
+    n_channels = 4
+  }
+  resized <- resize(image, 224, 224)
+  arr <- as.array(resized) * 255
+  dim(arr) <- c(224,224,n_channels)
+  m <- mean(arr)
+  print(paste("Color promedio de la imagen: ",m, sep = " "))
+  norm <- arr - m
+  dim(norm) = c(224,224,n_channels,1)
+  #norm <- norm[,,1:3,] #adaptar la imagen de 4 canales a 3 canales
+  return(norm)
+}
+
+función de clasificación: top5 más probable
+
+classify.image <- function(image, isPNG = F){
+  image.n <- preproc.image(image, isPNG)
+  prob <- predict(model, X = image.n)
+  #De todas las categorías, nos quedamos el top 5 de más probables
+  sorted.p <- order(prob[,1], decreasing = T)
+  max.idx <- sorted.p[1:5]
+  result <- data.frame(cat=synsets[max.idx], 
+                     prob = 100.0*prob[sorted.p[1:5]])
+
+  display(image)
+  result
+}
+
+
+display(image)
+classify.image(image)
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -479,6 +479,28 @@ b_details</p>
 n_rec) b_rec_matrix &lt;- sapply(<a href="mailto:b_pred@items" class="email">b_pred@items</a>, function(x){ colnames(df.filt)[x] })
 View(b_rec_matrix[,1:3])</p>
 </div>
+<div id="ejemplo-real-sistema-de-recomendaciones-de-películas" class="section level1">
+<h1>Ejemplo real: sistema de recomendaciones de películas</h1>
+<p>02-content based.R</p>
+<p>Tablas relacionadas por una columna (match) Clustering k-means
+(mclust) - alternativo - mejorar con cluster óptimo</p>
+</div>
+<div id="sistema-de-recomendación-híbrido" class="section level1">
+<h1>Sistema de recomendación híbrido</h1>
+<p>library(recommenderlab)</p>
+<p>Filtrar información relativa</p>
+<p>data_frame &lt;- df[rowCounts(df)&gt;n,]</p>
+<p>Partición en subconjuntos de entrenamiento y testeo</p>
+<p>train &lt;- test &lt;-</p>
+<p>Recomendación híbrida: seleccionar sistemas de recomendaciones que
+queremos utilizar en el híbrido y los pesos de cada uno de ellos</p>
+<p>hybrid_recom &lt;- HybridRecommender( Recommender(train, method =
+“UBCF”), Recommender(train, method = “RANDOM”), weights = c(0.25, 0.75)
+)</p>
+<p>Casting a lista de la predicción: para cada usuario nos recomienda 3
+items</p>
+<p>as(predict(hybrid_recom, test, 3), “list”)</p>
+</div>
 
 
 
