@@ -136,20 +136,165 @@ treemap(df,
 
 # Gráficos con matrices de correlación
 
+library(corrplot)
+
+Calcular coeficientes de correlación con métodos: Pearson, Spearman, etc...
+
+df.cor<-cor(df, method="pearson")
+
+corrplot(df.cor) ##círculos
+
+corrplot(df.cor, method=shade, shade.col=NA, tl.col="black", tl.srt=45) ##cuadrados //tl=etiquetas
+
+method=color, shade, square, circle, elipse, pie
+
+Podemos crear paletas de colores y ordenar
+
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", 
+                          "#77AADD", "#4477AA")) ##pillar paletas de internet
+
+corrplot(df, method = "square", 
+         tl.col = "black",
+         tl.srt = 45, col = col(200), ##(200) es la expansión de colores
+         shade.col=NA ##quita las lineas de correlación diagonales
+         addCoef.col = "black", ## añadir coeficientes
+         order = "AOE",  ## ordenar según el valor/clust para ordenader
+         type = "upper", ## solo el triángulo superior (por simetria)
+         diag = F, ## quitar la diagonal =1
+         addshade = "all") ## añadir las lineas diagonales de correlacion
+         
+
+## Matrices de correlación con ggplot2 y mapas de calor
+
+library(reshape2)
+df <- melt(df.cor)
+
+
+ggplot(data = df.melted, 
+       aes(x=Var1, y=Var2,fill=value))+
+  geom_tile()
+
+### Crear mapa de calor: funciones útiles
+
+Entrada: matriz de correlaciones
+
+get_lower_triangle <- function(cormat){
+  cormat[upper.tri(cormat)] <- NA
+  return(cormat)
+}
+
+get_upper_triangle <- function(cormat){
+  cormat[lower.tri(cormat)] <- NA
+  return(cormat)
+}
+
+reorder_cormat <- function(cormat){
+  dd <- as.dist((1-cormat)/2)
+  hc <- hclust(dd)
+  cormat <- cormat[hc$order, hc$order]
+ 
+ 
+ Crear matriz de correlación ordenada, nos quedamos con el triángul superior y lo fundimos
+ 
+ cormat<-reorder_cormat(df.cor)
+ cormat.ut<-get_upper_triangle(cormat)
+ cormat.ut.melted<-melt(cormat.ut, na.rm=T)
+ 
+ ggplot(cormat.ut.melted, aes(Var2, Var1, fill = value)) + 
+  geom_tile(color = "white")+
+  scale_fill_gradient2(low = "blue", high = "red", ##gradiente de color
+                       mid = "white", midpoint = 0,
+                       limit = c(-1,1), space = "Lab",
+                       name="Pearson\nCorrelation")+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45, vjust=1, 
+                                   size = 12, hjust=1))+
+  coord_fixed()
+
+ 
+# Graphs - Red de grafos
+
+library(igraph)
+
+se escriben los elementos(aristas) dos a dos:
+
+g.dir <- graph(edges = c(1,2, 2,3, 2,4, 1,4, 5,5, 3,6, 5,6), n=6) ##vectores origen,destino, n=nodos
+g.n_dir <- graph(edges = c(1,2, 2,3, 2,4, 1,4,
+                           5,5, 3,6, 5,6), n=6, directed = F) #no dirigido
+
+plot(g.dir)
+plot(g.n_dir)
+
+con elementos aislados:
+
+g_isolated <- graph(edges = c("Juan", "María", 
+                      "María", "Ana",
+                      "Ana", "Juan", 
+                      "José", "María",
+                      "Pedro", "José",
+                      "Joel", "Pedro"),
+                    isolates = c( "Carmen", "Antonio",  ##no relacionados
+                                  "Mario", "Vicente"))
+
+personalizado:
+
+
+par(mfrow = c(1,1))
+plot(g_isolated, edge.arrow.size = 1,
+     vertex.color="gold",vertex.size = 15,
+     vertex.frame.color = "gray", 
+     vertex.label.color = "black",
+     vertex.label.cex = 0.8,
+     vertex.label.dist = 2,
+     edge.curved=0.2)
+
+
+ Si queremos que siempre salga igual set_seed() configuramos una semilla.
+ 
+ 
+# Etiquetas y leyendas
+ 
+ggtitle(titulo)
+xlab(eje x)
+ylab(eje y)
+labs(....)
+
+...boxplot(x,y,fill)...+
+
+labs(fill = "factor") + ## split por factor - etiquetas en la leyenda
+theme(legend.position = "bottom") + ##posición leyenda
+guides(fill = F) ## nos cargamos la leyenda
+
+### Temas
+
+theme_bw()+
+theme_dark()+
+theme_classic()+
+theme_grey()+
+theme(plot.background = element_rect(fill="darkblue"))
+theme(axis.text.x = element_text(face = "bold", 
+                                   family = "Times",
+                                   size = 14,
+                                   angle = 45,
+                                   color = "#995566"),
+        axis.text.y = element_text(face = "italic",
+                                   family = "Courier",
+                                   size = 16,
+                                   angle = 30, 
+                                   color = "#449955")
+        )+
+theme(panel.border = element_blank())+ ##eliminar borde del gráfico
+theme(panel.grid.major = element_blank(), ##eliminar la parrilla mayor (grid)
+panel.grid.minor = element_blank()) ##eliminar la parrilla menor
+
+
+# Gráficos multivariante
 
 
 
+# Gráficos 3D
+VER
 
-
- 
- 
- 
- 
- 
- 
- 
- 
- 
  
  
  

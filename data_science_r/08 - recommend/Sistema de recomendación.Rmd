@@ -1,0 +1,191 @@
+---
+title: "08.1 - recommend"
+author: "Ccanadas"
+date: "2022-09-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Filtros colaborativos
+
+En LARGE DATASET a veces se accede por @ en vez de $
+
+library(recommenderlab)
+
+Filtros colaborativos: si un usuario A y otro B comparten los mismos intereses en el pasado, es probable que compartan interés en un futuro. Si A ha realizado una acción, es posible que B pueda realizarla en el futuro.
+
+1º) Primero: filtrado de información del dataset, quedarnos con elementos significativos (eliminar objetos con datos despreciables)
+
+df.filt<-df[rowCounts(df)>n, colCounts(df)>m]
+
+
+2º) Partición del dataset en train+validation data
+
+t.id <- sample(x = c(T,F), size = nrow(df.filt),
+               replace = T, prob = c(0.8, 0.2))
+
+data_train <- df.filt[t.id,]
+data_test <- df.filt[!t.id,]
+
+
+
+## Filtro colaborativo basado en items (IBCF)
+
+1º) CREAR MODELO DE DATOS
+Solo valora los items del usuario, y recomienda items similares del dataset. Para dos items cualquiera mide cómo de similares son en relación a la similitud en la valoración. Encuentra los K items más similares para cada item dado. Para cada usuario determina los items más similares a los que ya ha adquirido.
+
+Calcula similitudes entre dos items con medidas de similitud (simil. coseno, pearson, etc)
+
+ibcf <- Recommender(data = data_train,
+                    method = "IBCF", 
+                    parameter = list(k = 30)) 
+
+ibcf.mod <- getModel(ibcf)
+
+ibcf.mod
+
+View(ibcf.mod$sim)
+
+2º) CREAR RECOMENDACIONES 
+
+n_rec <- 10 ##lista de recomendaciones, número de items a recomendar
+
+ibcf.pred <- predict(object = ibcf, ##necesita todo el objeto recommender
+                     newdata = data_test,
+                     n = n_rec)
+
+
+ibcf.pred
+
+3º) Visualización de las recomendaciones
+
+ibcf.rec.matrix <- sapply(ibcf.pred@items, 
+                          function(x){
+                            colnames(df.filt)[x]
+                            }
+                          )
+View(ibcf.rec.matrix)
+
+RECORDATORIO: el modelo se hace en base a los datos filtrados de conjuntos de usarios e items con una cantidad de valores significativas.
+
+Podemos validar y predecir para el resto de usuarios.
+
+SE TOMA LA INFORMACIÓN DEL ITEM
+
+# Filtrado colaborativo basado en usuarios (UBCF)
+
+Calcular similitudes entre usuarios usando medidas de similitud y predecir como un nuevo usuario A valorará cierto item basado en como lo han hecho otros usuarios con gustos similares.
+
+Usa el método k-nearest neighbors 
+
+
+ubcf <- Recommender(data = data_train, method = "UBCF")
+ubcf.mod <- getModel(ubcf)
+ubcf.mod
+
+View(ubcf.mod$data)
+
+n_rec <- 10 ##top 10
+
+ubcf.pred <- predict(object = ubcf, 
+                     newdata = data_test, 
+                     n = n_rec)
+ubcf.pred
+
+ubcf.rec.matrix <- sapply(ubcf.pred@items,
+                          function(x){
+                            colnames(df.filt)[x]
+                          }
+                          )
+View(ubcf.rec.matrix[,1:3])
+
+
+head(ubcf.pred@items)
+colnames(df.filt)[94] #inspeccionar elementos
+
+
+
+# Representacion de la matriz de recomendaciones
+
+
+
+recommender_models <- recommenderRegistry$get_entries(dataType = "realRatingMatrix")
+names(recommender_models) ##variantes de sistemas de recomendaciones
+
+Visualizar a través de un mapa de calor:
+
+image(df, main = "Mapa de calor de la matriz de ...")
+
+Creamos filtro de valoraciones de itemss e usuarios (1% mejor)
+
+min_n_item <- quantile(rowCounts(df), 0.99) ##quedarnos con los mejores items
+min_n_users <- quantile(colCounts(df), 0.99)  ##quedarnos con los mejores usuarios
+
+Usamos el row/col count para valorar el número de rating de un items y quedarnos con los más valorados
+
+image(df[rowCounts(df)> min_n_item, 
+                 colCounts(df)>min_n_users])
+
+Creamos filtro de valoraciones de itemss e usuarios (2% mejor)
+En este caso nos quedamos con el objeto filtrado del inicio para evitar casos atípicos 
+
+min_r_item <- quantile(rowCounts(df.filt), 0.98) 
+min_r_users <- quantile(colCounts(df.filt), 0.98)
+image(rating_item[rowCounts(df.filt)> min_r_item,
+                    colCounts(df.filt)>min_r_users],
+      main = "Mapa de calor de ...")
+
+
+
+
+# Recomendaciones basadas en datos binarios
+
+Paa cuando no hay valoración de items/ fase temprana del proyecto
+
+Para este ejemplo creamos un objeto inferido de que si al menos tiene 1 valoración, se ha visto
+
+rating_item_viewed <- binarize(df.filt, minRating = 1) ##si existe valoracion 1 y si no 0
+image(rating_item_viewed)
+
+Aquí empieza el método real, con un dataset de visto/comprado/click (0 y 1)
+
+t.id <- sample(x=c(T,F),
+               size = nrow(rating_item_viewed),
+               replace = T, 
+               prob = c(0.8, 0.2)) ##80% train y 20% testing
+               
+b_data_train <- rating_item_viewed[t.id,]
+b_data_test <- rating_item_viewed[!t.id,]
+
+   #Jaccard index: d(i,j) = (i y j) / (i o j) - medida de distancia para binario
+   
+
+1º)Creamos modelo entrenado
+
+b_model <- Recommender(data = b_data_train,
+                       method = "IBCF",
+                       parameter = list(method = "Jaccard")
+                       )
+b_details <- getModel(b_model)
+b_details
+
+
+2º)Hacemos recomendación binaria con el predictor:
+
+b_pred <- predict(object = b_model,
+                  newdata = b_data_test, 
+                  n = n_rec)
+b_rec_matrix <- sapply(b_pred@items, function(x){
+                          colnames(df.filt)[x]
+                      })
+View(b_rec_matrix[,1:3])
+
+
+
+
+
+
+
