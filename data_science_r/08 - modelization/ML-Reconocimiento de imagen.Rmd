@@ -23,6 +23,23 @@ install.packages("png")
 
 Instalar libreria desde github y conectarse a biocLite (opensource de bioinformatica)
 
+--------------------------------------------------------------------------
+Vale, creo que ya lo tengo solucionado, aunque no estaría de más que se diera aquí una posible solución, yo particularmente lo he resuelto así:
+
+# añadimos un nuevo valor al array asociativo, le ponemos de clave mxnet
+
+repos["mxnet"] <- "https://apache-mxnet.s3-accelerate.dualstack.amazonaws.com/R/CRAN/"
+
+options(repos = repos)
+
+#Ahora podemos instalas el paquete mxnet
+
+install.packages("mxnet")
+
+Por cierto Juan, tenemos un error en el if, el nombre del fichero que debemos comprobar si existe es synset.txt y no syntex.txt
+
+---------------------------------------------------------------------------
+
 library(devtools)
 devtools::install_github("rich-iannone/DiagrammeR")
 source("http://bioconductor.org/biocLite.R")

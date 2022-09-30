@@ -16,7 +16,8 @@ test <- ccdata[-t.id,]
 table(training$Class)
 table(test$Class)
 
-training <- SMOTE(Class ~ ., training, perc.under = 100, perc.over = 200)
+training <- SMOTE(Class ~ ., training, perc.under = 100, perc.over = 200) #entre 100 y 200 percentil de datos (sobreescribir)
+##simular caracteristicas de la categoría de menor peso para aumentar el número de samples
 table(training$Class)
 
 training$Class <- as.numeric(training$Class)

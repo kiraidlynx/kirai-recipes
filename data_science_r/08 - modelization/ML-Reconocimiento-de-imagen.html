@@ -380,6 +380,38 @@ repos) install.packages(“mxnet”) #no disponible para R actualizado
 install.packages(“jpeg”) install.packages(“png”)</p>
 <p>Instalar libreria desde github y conectarse a biocLite (opensource de
 bioinformatica)</p>
+<table>
+<colgroup>
+<col width="100%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td>Vale, creo que ya lo tengo solucionado, aunque no estaría de más que
+se diera aquí una posible solución, yo particularmente lo he resuelto
+así:</td>
+</tr>
+<tr class="even">
+<td># añadimos un nuevo valor al array asociativo, le ponemos de clave
+mxnet</td>
+</tr>
+<tr class="odd">
+<td>repos[“mxnet”] &lt;- “<a href="https://apache-mxnet.s3-accelerate.dualstack.amazonaws.com/R/CRAN/" class="uri">https://apache-mxnet.s3-accelerate.dualstack.amazonaws.com/R/CRAN/</a>”</td>
+</tr>
+<tr class="even">
+<td>options(repos = repos)</td>
+</tr>
+<tr class="odd">
+<td>#Ahora podemos instalas el paquete mxnet</td>
+</tr>
+<tr class="even">
+<td>install.packages(“mxnet”)</td>
+</tr>
+<tr class="odd">
+<td>Por cierto Juan, tenemos un error en el if, el nombre del fichero
+que debemos comprobar si existe es synset.txt y no syntex.txt</td>
+</tr>
+</tbody>
+</table>
 <p>library(devtools) devtools::install_github(“rich-iannone/DiagrammeR”)
 source(“<a href="http://bioconductor.org/biocLite.R" class="uri">http://bioconductor.org/biocLite.R</a>”) biocLite()
 biocLite(“EBImage”)</p>
