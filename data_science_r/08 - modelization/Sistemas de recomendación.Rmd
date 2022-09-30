@@ -221,6 +221,129 @@ as(predict(hybrid_recom, test, 3), "list")
 
 
 
+# Cross validation - recommendation
+
+## Evaluación de modelos y parámetros
+
+MODELO DE k-fold cross validatioon
+
+n_folds <- 4 ##division del k-fold cross-validation (K)
+items_to_keep = 15  ## elementos que nos queremos quedar para cada uno de los conjuntos
+rating_threshold <- 3 ##umbral para considerar que un item es bueno
+eval_sets <- evaluationScheme(data = df.filt,
+                              method = "cross-validation",
+                              #train=% entrenamiento
+                              k = n_folds, 
+                              given = items_to_keep,
+                              goodRating = rating_threshold)
+
+size_sets <- sapply(eval_sets@runsTrain, length)
+size_sets
+
+
+
+### Evaluación de las valoraciones
+
+model_type <- "IBCF"
+model_params <- NULL
+eval_recommender <- Recommender(data = getData(eval_sets, "train"),
+                                method = model_type,
+                                parameter = model_params)
+                                
+Recomendaciones por usuarios:
+
+items_to_recommend <- 10
+eval_prediction <- predict(object = eval_recommender,
+                           newdata = getData(eval_sets, "known"),
+                           n = items_to_recommend,
+                           type = "colum_prediction")
+class(eval_prediction)
+
+qplot(rowCounts(eval_prediction)) + geom_histogram(binwidth = 20)+
+  ggtitle("Distribución de items por usuario")
+  
+  
+Para la precisión de nuestra recomendación:
+
+eval_accuracy <- calcPredictionAccuracy(x = eval_prediction,
+                                        data = getData(eval_sets, "unknown"),
+                                        byUser = T)
+head(eval_accuracy)
+
+qplot(eval_accuracy[,1])
+
+
+
+### Evaluación de las recomendaciones
+
+Ejecución de la evaluación del modelo, ya separa los datos internamente. Ejecuta la validación cruzada
+
+results <- evaluate(x = eval_sets,
+                    method = model_type,
+                    n = seq(10,100,10)) ##probando para distintos n de 10 en 10 (TOP 10: TOP 100)
+
+getConfusionMatrix(results)[[1]]
+
+plot(results, "prec/rec", annotate = T, main = "Precisión vs Eficacia")
+
+
+
+Precisión: proporción de items correctos sugeridos por el algoritmo sobre el conjunto total de items que este ha sugerido
+
+(Items relevantes INTERSEC Item sugeridos)/item sugeridos
+
+Eficacia: proporción de items correctos sugeridos por el algoritmo sobre el conjunto total de items que deberían haber sido sugeridos
+
+(Items relevantes INTERSEC Item sugeridos)/item relevantes
+
+
+
+# Identificaión del modelo adecuado
+
+models <- list(IBCF_cos = list(name = "IBCF", params = list(method = "cosine")),
+               IBCF_cor = list(name = "IBCF", params = list(method = "pearson")),
+               UBCF_cos = list(name = "UBCF", params = list(method = "cosine")),
+               UBCF_cor = list(name = "UBCF", params = list(method = "pearson")),
+               random = list(name = "RANDOM", params = NULL))
+               
+n_recomends <- c(1:5, seq(10,100,10))
+
+results <- evaluate(x = eval_sets, ## modelos de 4crossval
+                    method = models, ##se puede pasar una lista como métodos
+                    n = n_recomends)
+
+results
+
+Pintamos la curva AUC (area bajo la curva) para visualizar los resultados
+
+plot(results, annotate = 1, ## 
+     legend = "topleft") + title("Curva AUC")
+
+plot(results, "prec/rec", annotate = 1, 
+     legend = "topright") + title("Precisión vs Eficacia")
+
+
+
+
+# Optimización de parámetros
+
+Una vez tenemos el mejor modelo, optimizar los parámetros de ese modelo.
+
+vector_k <- c(5, seq(10,40,10)) # vector de k vecinos
+models <- lapply(vector_k, function(k){
+  list(name = "IBCF", param = list(method = "pearson", k = k)) ##construimos la lista de los modelos
+})
+
+names(models) <- paste0("IBCF_k_",vector_k) ##nombre todo en caracteres paste0,
+
+results <- evaluate(x = eval_sets,
+                    method = models,
+                    n=n_recomends)
+results
+
+plot(results, annotate = 1, legend = "topleft") + title("Curva ROC") ##elegir el k más alto
+
+plot(results, "prec/rec", annotate = 1, legend = "bottomright")+title("Precisión vs Eficacia")
 
 
 
