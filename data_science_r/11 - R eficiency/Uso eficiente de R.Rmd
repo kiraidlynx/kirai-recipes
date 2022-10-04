@@ -1,0 +1,195 @@
+---
+title: "11 - R eficiency"
+author: "Ccanadas"
+date: "2022-10-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Operaciones vectorizadas
+
+paste(v1,v2): toma dos vectores o df y los combina como si fuese un bucle
+
+
+función substr(string,1,2) : te quedas con el string original empezando en el primero y terminando en el segundo caracter
+
+
+sum(), min(), prod(), range().... todo operaciones sobre vectores sin usar bucles
+
+colSums(), rowSums(), colMeans(), rowMeans()
+
+
+
+## Función Apply
+
+
+Aplicar una función a filas o columnas a una matriz.
+
+
+apply(matriz, 1, funcion) : por filas
+apply(matriz, 2, funcion) : por columnas
+apply(matriz, c(1,2), funcion) : todos los elementos
+
+apply(m, 1, funcion, parámetros de la función)
+
+margin=3 para arrays 3d
+
+
+
+## Funcion Sapply, Lapply, tapply, by
+
+
+lapply: funciones especificas a cada elemento y devuelve tipo lista
+
+
+sapply: devuelve datos numericos
+
+
+tapply: aplica funciones filtrando por categorías
+ej: `tapply(df$col, df$factor, funcion)` :podemos usar varios factores a través de una lista de factores
+
+
+by: aplicar una función por factor, a un df entero: `by(df, df$factor, funcion)`
+
+
+
+# Técnica dividir-aplicar-combinar / split-apply-combine (map filter reduce)
+
+Pequeños datasets: library(plyr)
+
+La sintaxis es sencilla:
+
+XYply: X (entrada),Y (entrada), a(array), d(data.frame), l (list)
+X,Y=a/d/l
+
+Uso:
+
+ddply(df, col/factor, función) ##dataframe(d) de entrada, dataframe (d) de salida
+
+ddply(df, ~variables (se pueden aplicar a varias columnas usando un vector c()), función)
+
+
+ddply(df, .factor, summarize, frec=length(factor), mean_var=mean(var)) ##summarize por factor
+
+
+con el par(mfrow) podemos pintar una matriz de plots por factores
+
+
+### Concatenar DFs
+l<-list(l1,l1)
+l.big<-ldply(l1, I)
+
+
+## Conjuntos grandes de datos
+Patrón BIG DATA: library(dplyr)
+
+
+Conocer funciones básicas de SQL:
+*SELECT: función para seleccionar columnas/variables -> select()
+*WHERE: filtrar subconjuntos de filas -> filter()
+*GROUPBY: agrupar por criterio -> group_by() AGRUPACIONES / summarise() OPERACIONES SOBRE AGRUPACIONES
+*ORDERBY: ordenar datos -> arrange()
+*JOIN: combinar tablas -> join()
+*COLUMN ALIAS: crear nuevas variables -> 
+
+
+subset.df<-select(df, var1, var2,...)
+df.filtered<-filter(df, var1 CONDITION)
+función mutate para añadir columna en un df a la que se le aplica una función:
+df.norm<-mutate(df, var.norm=round((var-mean(var))/sd(var)))
+summarise(group_by(df, factor), function(variable))
+
+Operador PYPE %>% (leer como 'a continuación'): combinar diferentes capas /lineas de código
+
+df%>%
+filter(condicion)%>%
+group_by(factor)%>%
+summarise(funcion(var))%>%
+
+
+# Data table
+Trabajar con muchos datos de forma eficiente.
+Parámetros: DT[i,j,by]
+:= asignación
+No tiene nombre de filas, tiene claves para indexar las filas.
+
+libray(data.table)
+
+dt<-data.table(df)
+
+Formato datatable para acceder a una variable: dt[,.(var1,var2,...)]
+
+
+Filtro: df[factor%in%c(label1, label2,...)] // También podemos usar sentencias booleanas para filtrar
+
+Otra forma de filtrar es por similitud con la palabra reservada %like%
+
+dt[, funcion(var), by=factor]
+
+Definir nueva columna: dt[, mean_var:=mean(var), by=factor] ##Útil para clusters
+
+### Añadir variables usando listas:
+
+dt[, c("mean", "sd", "z_mpg"):= list(mean(var), sd(var), round((mean-mean(var))/sd(var)),2), by=factor]
+
+Añade a cada fila el valor por factor de las funciones listadas.
+
+
+### Calcular estadísticos para listas de variables
+
+Usar listas:
+
+dt[, lapply(.SD, mean), .SDcols=c("var1", "var2",...)]
+
+
+
+Usar el parámetro with=F para que devuelva un DataFrame en vez de DataTable.
+
+
+### Claves
+
+setkey(df, factor_column) : crea una variable como clave
+Podemos usar la clave del factor para acceder a un dato o a otro: ejemplo
+
+dt["label_key", cols, with=F]
+
+
+Para cálculos usar by= key.
+
+setkeyv para seleccionar varias claves [.(key), cols] para acceder
+
+El propio conjunto de claves es un objeto datatable.
+
+
+# Slice and Dice
+
+.N :para contar by=factor // "label",.N
+
+[, var:=NULL] // eliminar columna
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

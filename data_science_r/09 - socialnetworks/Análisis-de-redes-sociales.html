@@ -11,9 +11,9 @@
 
 <meta name="author" content="Ccanadas" />
 
-<meta name="date" content="2022-09-28" />
+<meta name="date" content="2022-09-30" />
 
-<title>07 - ggplot2</title>
+<title>09 - socialnetworks</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -363,212 +363,173 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">07 - ggplot2</h1>
+<h1 class="title toc-ignore">09 - socialnetworks</h1>
 <h4 class="author">Ccanadas</h4>
-<h4 class="date">2022-09-28</h4>
+<h4 class="date">2022-09-30</h4>
 
 </div>
 
 
-<p>library(ggplot2)</p>
-<p>1º) DATOS 2º) GEOM: geometrías (tipo de gráfico) 3º) Estéticas: aes
-(color, tamaño, forma, posición,…) 4º) Factor de escala: scale
-(información más allá de los datos)</p>
-<p>Ir añadiendo a partir de + las personalizaciones</p>
-<div id="gráficos-de-dispersión" class="section level1">
-<h1>Gráficos de dispersión</h1>
-<p>inicializar gráfico: plot&lt;-ggplot(df, aes(x,y))</p>
-<p>añadir capas: plot+geom_point() plot+geom_point(alpha=.5, size=5,
-aes(color=factor(factor_col))) ##Añadir colores por factor +
-geom_smooth(method=“lm”, se=FALSE, col=“green”) +</p>
-<pre><code> ##se=TRUE pinta el intervalo de confianza
- </code></pre>
-<p>más opciones de representación: facet_grid(y(factor)~.) ##Representar
-gráficos separados por factor (podemos hacer .~y para trasponer)
-theme_bw(base_family=“Arial”, base_size=10) ##tema (familia de fuentes)
-labs(x=“xlab”)+labs(y=“ylab) ##etiquetas labs(title=”titulo”)</p>
-<pre><code> ##facet_wrap: añadir más dimensiones al gráfico: envolver los gráficos en filas y columnas coherentes</code></pre>
-<p>qplot&lt;-versión simplificada de ggplot2</p>
-<p>ej: qplot(x=x, y =y , data = df, geom=c(“point”, “smooth”), method =
-“lm”, formula = y~x, color = factor, main = “titulo”)</p>
-<p>#Gráficos de líneas</p>
-<p>plot&lt;-ggplot(df, aes(x,y)) plot+geom_line()
-plot+geom_line(linetype=“dashed”) plot+geom_line(color=“color”)</p>
-<p>parámetros: tamaño, tipo , etc.. (podemos utilizar los parámetros
-dentro del mismo geom_line)</p>
-<p>plot+geom_line(aes(color=as.factor(columna))) agrupar lineas por
-color/categoría</p>
+<div id="api-meetup" class="section level1">
+<h1>API MeetUp</h1>
+<ul>
+<li></li>
+</ul>
 </div>
-<div id="gráfico-de-barras" class="section level1">
-<h1>Gráfico de barras</h1>
-<p>library(dplyr) ##instrucciones bases de datos</p>
-<p>1º) crear un df que resuma la información (variables de conteo)</p>
-<p>df.sum=df%&gt;% group_by(factor1, factor2)%&gt;%
-summarize(variable_de_conteo=sum(cnt))</p>
-<p>df.sum</p>
-<p>2º) plot</p>
-<p>ggplot(df.sum, aes(x=x, y=y, fill=otra_variable,
-label=scales::comma(variable_conteo)))+ ##fill, separa por colores otro
-factor geom_bar(show.legend=T, stat=“identity, fill=”color”,
-colour=“black”)+ ##stat identity muestra que la Y es una col del
-dataset/stat=bin si no lo es labs(title=“titulo”)+
-scale_y_continuous(labels=scales::comma)+ ##etiquetas dentro de las
-cajas geom_text(size=3, position=position_stack(vjust=0.5)) ##formato
-etiquetas</p>
+<div id="grafos" class="section level1">
+<h1>Grafos</h1>
+<div id="matriz-de-adyacencias-sparsed-o-lista-de-aristas-para-representar-grafos." class="section level3">
+<h3>Matriz de adyacencias sparsed o lista de aristas para representar
+grafos.</h3>
+<p>library(Matrix)</p>
+<p>Cargar un objeto Rdata de usuarios y crear una sparse matrix.</p>
+<p><code>group_membership=sparseMatrix(users$group_id, users$user_id, x=T)</code>
+(X=T asigna TRUE si existe objeto en columna)</p>
+<p>Matriz de adyacencia: reprentar users vs users, el valor ij vendrá
+dado por el número de elementos o grupos en común.</p>
+<p><code>adjacency&lt;-t(group_membership)%*%group_membership</code></p>
+<p>Usuarios: nodos, Grupos: aristas o al revés. // Pintamos la matriz de
+adyacencia en un grafo.</p>
+<p>Matriz de aristas se puede extraer como resumen de la matriz de
+adyacencia:</p>
+<p>head(summary(adjacency)): Matriz de aristas</p>
+<p>user_edgelist&lt;-as.data.frame(summary(adjacency))</p>
+<p>Nos quedamos el triángulo superior por ser una matriz simétrica:</p>
+<p><code>user_edgelist.upper&lt;-users_edgelist[users_edgelist$i&lt;users_edgelist$j]</code></p>
+<p>save(user_edgelist.upper, file=““): guardar en fichero para
+trabajar</p>
 </div>
-<div id="gráficos-de-distribuciones" class="section level1">
-<h1>Gráficos de distribuciones</h1>
-<p>plot&lt;-ggplot(df, aes(x=x_var)) plot+geom_histogram() + ##frec.
-absolutas plot+geom_histogram(binwidth=5, fill=“color”, colour=“black”)
-+ ##número de divisiones/anchura division</p>
-<p>Para representar la función de densidad:</p>
-<p>1º) cambiar a frec. relativas</p>
-<p>ggplot(df, aes=(x=x, y=..density..))+ geom_histogram(fill=“cornsilk”,
-color=“grey6”, size=.2)+</p>
-<p>2º) añadir la función de densidad</p>
-<p>geom_density()+xlim(n,m) ##para ajustar la línea de densidad y
-suavizar los límites</p>
-</div>
-<div id="gráficos-de-mosáicos" class="section level1">
-<h1>Gráficos de mosáicos</h1>
-<p>Concurrencia de probabilidades condicionales</p>
-<p>library(stats)</p>
-<p>mosaicplot(~var1+var2, data=df, color=n:m o color=T, las=1)</p>
-<p>solo hay que aplicar las variables que vamos a cruzar y las columnar
-en el vector de color</p>
-</div>
-<div id="treemaps" class="section level1">
-<h1>Treemaps</h1>
-<p>library(treemap)</p>
-<p>1º) construir un df ramificado: variables categóricas y un valor</p>
-<p>branch &lt;- c(rep(“branch-1”,4), rep(“branch-2”,2),
-rep(“branch-3”,3)) subbranch &lt;-
-paste(“subbranch”,c(1,2,3,4,1,2,1,2,3), sep = “-”) values =
-c(15,4,22,13,11,8,6,1,25) data &lt;- data.frame(branch, subbranch,
-values)</p>
-<p>treemap(data, index = c(“branch”, “subbranch”), vSize = “values”,
-type = “index”)</p>
-<p>2º) a partir de un df</p>
-<p>treemap(df, index = c(“var_1”, “var_2”), vSize = “var_value”, type =
-“index”)</p>
-</div>
-<div id="gráficos-con-matrices-de-correlación" class="section level1">
-<h1>Gráficos con matrices de correlación</h1>
-<p>library(corrplot)</p>
-<p>Calcular coeficientes de correlación con métodos: Pearson, Spearman,
-etc…</p>
-<p>df.cor&lt;-cor(df, method=“pearson”)</p>
-<p>corrplot(df.cor) ##círculos</p>
-<p>corrplot(df.cor, method=shade, shade.col=NA, tl.col=“black”,
-tl.srt=45) ##cuadrados //tl=etiquetas</p>
-<p>method=color, shade, square, circle, elipse, pie</p>
-<p>Podemos crear paletas de colores y ordenar</p>
-<p>col &lt;- colorRampPalette(c(“#BB4444”, “#EE9988”, “#FFFFFF”,
-“#77AADD”, “#4477AA”)) ##pillar paletas de internet</p>
-<p>corrplot(df, method = “square”, tl.col = “black”, tl.srt = 45, col =
-col(200), ##(200) es la expansión de colores shade.col=NA ##quita las
-lineas de correlación diagonales addCoef.col = “black”, ## añadir
-coeficientes order = “AOE”, ## ordenar según el valor/clust para
-ordenader type = “upper”, ## solo el triángulo superior (por simetria)
-diag = F, ## quitar la diagonal =1 addshade = “all”) ## añadir las
-lineas diagonales de correlacion</p>
-<div id="matrices-de-correlación-con-ggplot2-y-mapas-de-calor" class="section level2">
-<h2>Matrices de correlación con ggplot2 y mapas de calor</h2>
-<p>library(reshape2) df &lt;- melt(df.cor)</p>
-<p>ggplot(data = df.melted, aes(x=Var1, y=Var2,fill=value))+
-geom_tile()</p>
-<div id="crear-mapa-de-calor-funciones-útiles" class="section level3">
-<h3>Crear mapa de calor: funciones útiles</h3>
-<p>Entrada: matriz de correlaciones</p>
-<p>get_lower_triangle &lt;- function(cormat){ cormat[upper.tri(cormat)]
-&lt;- NA return(cormat) }</p>
-<p>get_upper_triangle &lt;- function(cormat){ cormat[lower.tri(cormat)]
-&lt;- NA return(cormat) }</p>
-<p>reorder_cormat &lt;- function(cormat){ dd &lt;- as.dist((1-cormat)/2)
-hc &lt;- hclust(dd) cormat &lt;- cormat[hc<span class="math inline">\(order, hc\)</span>order]</p>
-<p>Crear matriz de correlación ordenada, nos quedamos con el triángul
-superior y lo fundimos</p>
-<p>cormat&lt;-reorder_cormat(df.cor)
-cormat.ut&lt;-get_upper_triangle(cormat)
-cormat.ut.melted&lt;-melt(cormat.ut, na.rm=T)</p>
-<p>ggplot(cormat.ut.melted, aes(Var2, Var1, fill = value)) +
-geom_tile(color = “white”)+ scale_fill_gradient2(low = “blue”, high =
-“red”, ##gradiente de color mid = “white”, midpoint = 0, limit =
-c(-1,1), space = “Lab”, name=“Pearson”)+ theme_minimal()+
-theme(axis.text.x = element_text(angle = 45, vjust=1, size = 12,
-hjust=1))+ coord_fixed()</p>
-</div>
-</div>
-</div>
-<div id="graphs---red-de-grafos" class="section level1">
-<h1>Graphs - Red de grafos</h1>
+<div id="grafos-1" class="section level2">
+<h2>Grafos</h2>
+<p>E=aristas G=grado V=vertice</p>
+<div id="preprocesado" class="section level3">
+<h3>Preprocesado</h3>
 <p>library(igraph)</p>
-<p>se escriben los elementos(aristas) dos a dos:</p>
-<p>g.dir &lt;- graph(edges = c(1,2, 2,3, 2,4, 1,4, 5,5, 3,6, 5,6), n=6)
-##vectores origen,destino, n=nodos g.n_dir &lt;- graph(edges = c(1,2,
-2,3, 2,4, 1,4, 5,5, 3,6, 5,6), n=6, directed = F) #no dirigido</p>
-<p>plot(g.dir) plot(g.n_dir)</p>
-<p>con elementos aislados:</p>
-<p>g_isolated &lt;- graph(edges = c(“Juan”, “María”, “María”, “Ana”,
-“Ana”, “Juan”, “José”, “María”, “Pedro”, “José”, “Joel”, “Pedro”),
-isolates = c( “Carmen”, “Antonio”, ##no relacionados “Mario”,
-“Vicente”))</p>
-<p>personalizado:</p>
-<p>par(mfrow = c(1,1)) plot(g_isolated, edge.arrow.size = 1,
-vertex.color=“gold”,vertex.size = 15, vertex.frame.color = “gray”,
-vertex.label.color = “black”, vertex.label.cex = 0.8, vertex.label.dist
-= 2, edge.curved=0.2)</p>
-<p>Si queremos que siempre salga igual set_seed() configuramos una
-semilla.</p>
+<p>load(rdata.object)</p>
+<p>Si el objeto es muy grande: creamos una red social reducida filtrando
+ocurrencias</p>
+<p>users_edgelist.filtered &lt;-
+users_edgelist.upper[users_edgelist.upper$x&gt;15,]
+nrow(users_edgelist.filtered) head(users_edgelist.filtered)</p>
+<p>reescalar los identificadores de usuario / truco para visualizar
+mejor</p>
+<p><code>uids &lt;- unique(c(users_edgelist.filtered$i, users_edgelist.filtered$j))</code></p>
+<p>i &lt;- match(users_edgelist.filtered<span class="math inline">\(i,
+uids) j &lt;- match(users_edgelist.filtered\)</span>j, uids)</p>
+<p>new.graph &lt;- data.frame(i, j, x = users_edgelist.filtered$x)</p>
 </div>
-<div id="etiquetas-y-leyendas" class="section level1">
-<h1>Etiquetas y leyendas</h1>
-<p>ggtitle(titulo) xlab(eje x) ylab(eje y) labs(….)</p>
-<p>…boxplot(x,y,fill)…+</p>
-<p>labs(fill = “factor”) + ## split por factor - etiquetas en la leyenda
-theme(legend.position = “bottom”) + ##posición leyenda guides(fill = F)
-## nos cargamos la leyenda</p>
-<div id="temas" class="section level3">
-<h3>Temas</h3>
-<p>theme_bw()+ theme_dark()+ theme_classic()+ theme_grey()+
-theme(plot.background = element_rect(fill=“darkblue”)) theme(axis.text.x
-= element_text(face = “bold”, family = “Times”, size = 14, angle = 45,
-color = “#995566”), axis.text.y = element_text(face = “italic”, family =
-“Courier”, size = 16, angle = 30, color = “#449955”) )+
-theme(panel.border = element_blank())+ ##eliminar borde del gráfico
-theme(panel.grid.major = element_blank(), ##eliminar la parrilla mayor
-(grid) panel.grid.minor = element_blank()) ##eliminar la parrilla
-menor</p>
+<div id="representación" class="section level3">
+<h3>Representación</h3>
+<p>g &lt;- graph.data.frame(new.graph, directed = F) g #nomenclatura:
+vertice/arista save(g, file = “path”) plot.igraph(g, vertex.size =
+20)</p>
+<p>plot.igraph(g, layout = layout.circle, vertex.size = 20) ##layout es
+la distribución de los vértices</p>
+<p>plot.igraph(g, edge.curved = T, vertex.color = “pink”, edge.color =
+“blue”)</p>
+<p><code>V(g)$size = degree(g)*4</code> -&gt; el tamaño del nodo es
+igual al grado de importancia</p>
+<p>plot.igraph(g, edge.curved = T, vertex.color = “pink”, edge.color =
+“blue”)</p>
+<p>Darle color por importancia: color &lt;- ifelse(degree(g)&gt;5,“red”,
+“blue”) size &lt;- degree(g)*4 plot.igraph(g, vertex.label = NA, layout
+= layout.fruchterman.reingold, vertex.color = color, vertex.size =
+size)</p>
+<p>Grosor de las aristas propocional al peso: E(g)$x plot.igraph(g,
+edge.curved =T, edge.color = “black”, edge.width =
+(E(g)-min(E(g))+1)/5)</p>
 </div>
 </div>
-<div id="gráficos-multivariante" class="section level1">
-<h1>Gráficos multivariante</h1>
-<p>library(ggplot2) library(GGally)</p>
-<p>ggplot(df, aes(x=x, y = y))+ geom_point(size=3,
-aes(color=variable_factor))+ theme(legend.position = “bottom”)+
-geom_smooth(method=“lm”, se=F, col=“red”)+ facet_grid(var_y1 ~ var_x2)
-##añadir dimensión adicional en formato parrilla/ crea una matriz de
-gráficas</p>
-<p>GGAlly-visión general de un dataframe</p>
-<p>Diagonal: función de distribución (variable con respecto a si misma)
-Matriz simétrica: puntos simétricos se complementan: scatterplot -
-correlación</p>
-<p>ggpairs(df[,num_cols_repr], aes(colour = factor, alpha = 0.4), title
-= “Análisis multivariante de x”, upper = list(continuous = “density”),
-lower = list(combo = “denstrip”))+ theme(plot.title = element_text(hjust
-= 0.5))</p>
+<div id="más-opciones" class="section level2">
+<h2>Más opciones</h2>
+<p>Antes de dibujar un grafo, hay que crear un objeto graph.data.frame a
+partir de un data.frame</p>
+<p>####Grafo dirigido</p>
+<p>Hay que cargar el DF dirigido: dg &lt;- graph.data.frame(new.graph,
+directed=T) save(dg, file = “../data/tema9/meetup-hiking-d-graph.Rdata”)
+plot.igraph(dg, edge.curved = T, edge.color = “black”, vertex.label.cex
+= 0.5)</p>
+<p>####Grafo con pesos en las aristas</p>
+<p>Tercera columna: peso de arista con nombre “weight”</p>
+<p>new.graph.w &lt;- new.graph names(new.graph.w) &lt;-
+c(“i”,“j”,“weight”) wg&lt;-graph.data.frame(new.graph.w,directed=F) wg
+<code>E(wg)$weight</code>
+<code>plot.igraph(wg, edge.label = E(wg)$weight)</code> ##acceso a los
+pesos de las aristas E(wg) y pintar labels</p>
+<p>####Obtener la matriz de adyacencia de un grafo</p>
+<p>get.adjacency(g, type = “both”) get.adjacency(g, type = “upper”, attr
+= “x”) ##con pesos</p>
+<p>####Obtener la lista de aristas a partir de un grafo</p>
+<p>get.data.frame(g) V(g)$size = degree(g) get.data.frame(g, “vertices”)
+get.data.frame(g, “both”)</p>
+<p>####Grafo bipartito</p>
+<p>Grafo donde los nodos se dividen en dos grupos de modo que solamente
+están relacionados los de un grupo con los del otro. No existen
+conexiones intergrupo.</p>
+<p>g1 &lt;- rbinom(10,1,0.5) g2 &lt;- rbinom(10,1,0.5) g3 &lt;-
+rbinom(10,1,0.5) g4 &lt;- rbinom(10,1,0.5) g5 &lt;- rbinom(10,1,0.5)</p>
+<p>membership &lt;- data.frame(g1,g2,g3,g4,g5) names(membership)
+rownames(membership) &lt;-
+c(“u1”,“u2”,“u3”,“u4”,“u5”,“u6”,“u7”,“u8”,“u9”,“u10”)
+rownames(membership)</p>
+<p>bg &lt;- graph.incidence(membership) bg V(bg)<span class="math inline">\(type V(bg)\)</span>name</p>
+<p>layout &lt;- layout.bipartite(bg) ##distribución de vértices save(bg,
+file = “../data/tema9/bipartite-graph.Rdata”) plot(bg, layout=layout,
+vertex.size = 15)</p>
+<p>####Proyección de un grafo bipartito</p>
+<p>relaciones entre usuarios y grupos:</p>
+<p>p &lt;- bipartite.projection(bg) p</p>
+<p>plot(p<span class="math inline">\(proj1, vertex.size = 15)
+plot(p\)</span>proj2, vertex.size = 20)</p>
 </div>
-<div id="gráficos-3d" class="section level1">
-<h1>Gráficos 3D</h1>
-<p>VER</p>
 </div>
-<div id="exportar-gráficos-a-varios-formatos-de-salida" class="section level1">
-<h1>Exportar gráficos a varios formatos de salida</h1>
-<p>Antes de realizar el gráfico se llama a la función del formato:</p>
-<p>png(file=“multivariant.png”, width = 3000, height = 3000, res = 72)
-postscript(file=“multivariant.ps”) pdf(file=“multivariant.pdf”)</p>
-<p>Al terminar el gráfico:</p>
-<p>dev.off()</p>
+<div id="métricas" class="section level1">
+<h1>Métricas</h1>
+<p>Betweeness (Intermediación) y Closeness (Cercanía): alto grado de
+centralidad: influencers.</p>
+<p>library(igraph)</p>
+<p>Cargar ficheros de grafos: Rdata</p>
+<div id="grados" class="section level4">
+<h4>Grados</h4>
+<p>degree(g): centralizar los vértices/calcula el grado</p>
+<p>degree(g, “nodo o grupo”) : específico /parámetro mode=“in” o “out”
+te da el grado de salida o entrada</p>
+<p>options(digits=3) degree.distribution(g) : distribución de los grados
+en el grafo</p>
+</div>
+<div id="betweenness" class="section level4">
+<h4>Betweenness</h4>
+<p>betweenness(g) :el grado de intermediación de cada nodo</p>
+<p>betweenness(g, “nodo”)</p>
+<p>edge.betweenness(g): importancia de la arista / edge.betweenness(g,
+“nodo”)</p>
+</div>
+<div id="closeness" class="section level4">
+<h4>Closeness</h4>
+<p>closeness(g) closeness(g, mode=“in” / “out”) : cuando son dirigidos
+hay que especificar si in o out //all y total también</p>
+</div>
+<div id="conexiones-en-grafos-dirigidos" class="section level2">
+<h2>Conexiones en grafos dirigidos</h2>
+<p>E(g): aristas</p>
+<p>neighbors(g,vértice(usuarios, nodos, etc)): vecinos innmediatos</p>
+<p>V(g) : vértices</p>
+<p>Podemos quedarnos con los nombres con $name[neighbors(g, nodo)]</p>
+<p>neighborhood(g, order=dist, nodes=nodo): encontrar el vecindario de
+un nodo de distancia (orden) X</p>
+<p>Añadir nodos al objeto grafo:</p>
+<p>new.g&lt;-g+vertex(v+1, v+2,…)# v=vertices del nodo original</p>
+<p>Añadir aristas:</p>
+<p>new.g&lt;-new.g+vertex(v+1,v+2) : añade una arista entre el nodo v+1
+y v+2</p>
+<p>Borrar vértices de grado=0 (o cualquiera que no nos interese con
+grado&lt;n)</p>
+<p>new.g&lt;-delete.vertices(new.g, V(new.g)[degree(new.g)==0])</p>
+<p>Cuidado: hay que nombrar los vértices asignando los valores, sino,
+podemos borrar el identificador y se reasignen los valores.</p>
+<p>Subgrafo inducido: g.sub&lt;-induced.subgraph(g, c(vertices que
+queremos))</p>
+</div>
 </div>
 
 

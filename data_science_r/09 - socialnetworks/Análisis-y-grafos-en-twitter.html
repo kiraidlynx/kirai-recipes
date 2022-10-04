@@ -11,9 +11,9 @@
 
 <meta name="author" content="Ccanadas" />
 
-<meta name="date" content="2022-09-28" />
+<meta name="date" content="2022-10-03" />
 
-<title>07 - ggplot2</title>
+<title>09.2 - Grafos de twitter</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -363,212 +363,71 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">07 - ggplot2</h1>
+<h1 class="title toc-ignore">09.2 - Grafos de twitter</h1>
 <h4 class="author">Ccanadas</h4>
-<h4 class="date">2022-09-28</h4>
+<h4 class="date">2022-10-03</h4>
 
 </div>
 
 
-<p>library(ggplot2)</p>
-<p>1º) DATOS 2º) GEOM: geometrías (tipo de gráfico) 3º) Estéticas: aes
-(color, tamaño, forma, posición,…) 4º) Factor de escala: scale
-(información más allá de los datos)</p>
-<p>Ir añadiendo a partir de + las personalizaciones</p>
-<div id="gráficos-de-dispersión" class="section level1">
-<h1>Gráficos de dispersión</h1>
-<p>inicializar gráfico: plot&lt;-ggplot(df, aes(x,y))</p>
-<p>añadir capas: plot+geom_point() plot+geom_point(alpha=.5, size=5,
-aes(color=factor(factor_col))) ##Añadir colores por factor +
-geom_smooth(method=“lm”, se=FALSE, col=“green”) +</p>
-<pre><code> ##se=TRUE pinta el intervalo de confianza
- </code></pre>
-<p>más opciones de representación: facet_grid(y(factor)~.) ##Representar
-gráficos separados por factor (podemos hacer .~y para trasponer)
-theme_bw(base_family=“Arial”, base_size=10) ##tema (familia de fuentes)
-labs(x=“xlab”)+labs(y=“ylab) ##etiquetas labs(title=”titulo”)</p>
-<pre><code> ##facet_wrap: añadir más dimensiones al gráfico: envolver los gráficos en filas y columnas coherentes</code></pre>
-<p>qplot&lt;-versión simplificada de ggplot2</p>
-<p>ej: qplot(x=x, y =y , data = df, geom=c(“point”, “smooth”), method =
-“lm”, formula = y~x, color = factor, main = “titulo”)</p>
-<p>#Gráficos de líneas</p>
-<p>plot&lt;-ggplot(df, aes(x,y)) plot+geom_line()
-plot+geom_line(linetype=“dashed”) plot+geom_line(color=“color”)</p>
-<p>parámetros: tamaño, tipo , etc.. (podemos utilizar los parámetros
-dentro del mismo geom_line)</p>
-<p>plot+geom_line(aes(color=as.factor(columna))) agrupar lineas por
-color/categoría</p>
-</div>
-<div id="gráfico-de-barras" class="section level1">
-<h1>Gráfico de barras</h1>
-<p>library(dplyr) ##instrucciones bases de datos</p>
-<p>1º) crear un df que resuma la información (variables de conteo)</p>
-<p>df.sum=df%&gt;% group_by(factor1, factor2)%&gt;%
-summarize(variable_de_conteo=sum(cnt))</p>
-<p>df.sum</p>
-<p>2º) plot</p>
-<p>ggplot(df.sum, aes(x=x, y=y, fill=otra_variable,
-label=scales::comma(variable_conteo)))+ ##fill, separa por colores otro
-factor geom_bar(show.legend=T, stat=“identity, fill=”color”,
-colour=“black”)+ ##stat identity muestra que la Y es una col del
-dataset/stat=bin si no lo es labs(title=“titulo”)+
-scale_y_continuous(labels=scales::comma)+ ##etiquetas dentro de las
-cajas geom_text(size=3, position=position_stack(vjust=0.5)) ##formato
-etiquetas</p>
-</div>
-<div id="gráficos-de-distribuciones" class="section level1">
-<h1>Gráficos de distribuciones</h1>
-<p>plot&lt;-ggplot(df, aes(x=x_var)) plot+geom_histogram() + ##frec.
-absolutas plot+geom_histogram(binwidth=5, fill=“color”, colour=“black”)
-+ ##número de divisiones/anchura division</p>
-<p>Para representar la función de densidad:</p>
-<p>1º) cambiar a frec. relativas</p>
-<p>ggplot(df, aes=(x=x, y=..density..))+ geom_histogram(fill=“cornsilk”,
-color=“grey6”, size=.2)+</p>
-<p>2º) añadir la función de densidad</p>
-<p>geom_density()+xlim(n,m) ##para ajustar la línea de densidad y
-suavizar los límites</p>
-</div>
-<div id="gráficos-de-mosáicos" class="section level1">
-<h1>Gráficos de mosáicos</h1>
-<p>Concurrencia de probabilidades condicionales</p>
-<p>library(stats)</p>
-<p>mosaicplot(~var1+var2, data=df, color=n:m o color=T, las=1)</p>
-<p>solo hay que aplicar las variables que vamos a cruzar y las columnar
-en el vector de color</p>
-</div>
-<div id="treemaps" class="section level1">
-<h1>Treemaps</h1>
-<p>library(treemap)</p>
-<p>1º) construir un df ramificado: variables categóricas y un valor</p>
-<p>branch &lt;- c(rep(“branch-1”,4), rep(“branch-2”,2),
-rep(“branch-3”,3)) subbranch &lt;-
-paste(“subbranch”,c(1,2,3,4,1,2,1,2,3), sep = “-”) values =
-c(15,4,22,13,11,8,6,1,25) data &lt;- data.frame(branch, subbranch,
-values)</p>
-<p>treemap(data, index = c(“branch”, “subbranch”), vSize = “values”,
-type = “index”)</p>
-<p>2º) a partir de un df</p>
-<p>treemap(df, index = c(“var_1”, “var_2”), vSize = “var_value”, type =
-“index”)</p>
-</div>
-<div id="gráficos-con-matrices-de-correlación" class="section level1">
-<h1>Gráficos con matrices de correlación</h1>
-<p>library(corrplot)</p>
-<p>Calcular coeficientes de correlación con métodos: Pearson, Spearman,
-etc…</p>
-<p>df.cor&lt;-cor(df, method=“pearson”)</p>
-<p>corrplot(df.cor) ##círculos</p>
-<p>corrplot(df.cor, method=shade, shade.col=NA, tl.col=“black”,
-tl.srt=45) ##cuadrados //tl=etiquetas</p>
-<p>method=color, shade, square, circle, elipse, pie</p>
-<p>Podemos crear paletas de colores y ordenar</p>
-<p>col &lt;- colorRampPalette(c(“#BB4444”, “#EE9988”, “#FFFFFF”,
-“#77AADD”, “#4477AA”)) ##pillar paletas de internet</p>
-<p>corrplot(df, method = “square”, tl.col = “black”, tl.srt = 45, col =
-col(200), ##(200) es la expansión de colores shade.col=NA ##quita las
-lineas de correlación diagonales addCoef.col = “black”, ## añadir
-coeficientes order = “AOE”, ## ordenar según el valor/clust para
-ordenader type = “upper”, ## solo el triángulo superior (por simetria)
-diag = F, ## quitar la diagonal =1 addshade = “all”) ## añadir las
-lineas diagonales de correlacion</p>
-<div id="matrices-de-correlación-con-ggplot2-y-mapas-de-calor" class="section level2">
-<h2>Matrices de correlación con ggplot2 y mapas de calor</h2>
-<p>library(reshape2) df &lt;- melt(df.cor)</p>
-<p>ggplot(data = df.melted, aes(x=Var1, y=Var2,fill=value))+
-geom_tile()</p>
-<div id="crear-mapa-de-calor-funciones-útiles" class="section level3">
-<h3>Crear mapa de calor: funciones útiles</h3>
-<p>Entrada: matriz de correlaciones</p>
-<p>get_lower_triangle &lt;- function(cormat){ cormat[upper.tri(cormat)]
-&lt;- NA return(cormat) }</p>
-<p>get_upper_triangle &lt;- function(cormat){ cormat[lower.tri(cormat)]
-&lt;- NA return(cormat) }</p>
-<p>reorder_cormat &lt;- function(cormat){ dd &lt;- as.dist((1-cormat)/2)
-hc &lt;- hclust(dd) cormat &lt;- cormat[hc<span class="math inline">\(order, hc\)</span>order]</p>
-<p>Crear matriz de correlación ordenada, nos quedamos con el triángul
-superior y lo fundimos</p>
-<p>cormat&lt;-reorder_cormat(df.cor)
-cormat.ut&lt;-get_upper_triangle(cormat)
-cormat.ut.melted&lt;-melt(cormat.ut, na.rm=T)</p>
-<p>ggplot(cormat.ut.melted, aes(Var2, Var1, fill = value)) +
-geom_tile(color = “white”)+ scale_fill_gradient2(low = “blue”, high =
-“red”, ##gradiente de color mid = “white”, midpoint = 0, limit =
-c(-1,1), space = “Lab”, name=“Pearson”)+ theme_minimal()+
-theme(axis.text.x = element_text(angle = 45, vjust=1, size = 12,
-hjust=1))+ coord_fixed()</p>
+<div id="análisis-de-tweets" class="section level1">
+<h1>Análisis de tweets</h1>
+<p>library(twitteR) library(igraph) library(dplyr)</p>
+<p>api_key &lt;- “” api_secret &lt;- “” access_token &lt;- “”
+access_token_secret &lt;- “”</p>
+<p>Conectar a twitter: setup_twitter_oauth(api_key, api_secret,
+access_token, access_token_secret)</p>
+<p>Descargar tweets/parámetros filters: all_tweets &lt;-
+searchTwitter(“tag”, n = 2000)</p>
+<p>Pasar a dataframe la lista: all_tweets &lt;-
+twListToDF(all_tweets)</p>
+<p>sample_tweets &lt;- all_tweets[numero de filas que necesitamos, ]
+#jugar con pocos tweets y aplicar luego los algoritmos a todos</p>
+<p>Dividir tweets para crear network de tweets y otra de retweets para
+el grafo split_tweets &lt;- split(sample_tweets,
+sample_tweets$isRetweet)</p>
+<p>Mutamos los retwees para quedarnos con el usuario y el tweet retweets
+&lt;- mutate(split_tweets[[‘TRUE’]], #mutate añade una columna a la
+lista con condición dada del emisor del tweet sender = substr(text, 5,
+regexpr(“:”,text)-1)) #nos quedamos con los retweets eliminando los 4
+primero parámetros y quedádnonos con los usuarios que han hecho el
+retweet. (empezar la posición 5 y termina donde hay dos puntos :)</p>
+<p>Nos quedamos con el emisor y el retweeteador en un DF para generar
+las aristas</p>
+<p><code>edge_list &lt;- as.data.frame(cbind(sender = tolower(retweets$sender), receiver = tolower(retweets$screenName)))</code></p>
+<p>edge_list &lt;- count(edge_list, sender, receiver) #lista de aristas
+(asigna un emisor a un receptor)</p>
+<p>Creamos el objeto graph y el plot:</p>
+<p>tweets_graph &lt;- graph_from_data_frame(d=edge_list, directed = T)
+save(tweets_graph, file=“path/name.Rdata”)</p>
+<p>plot(tweets_graph, #layout=layout.fruchterman.reingold, vertex.color
+= “blue”, vertex.size = degree(tweets_graph, mode = “in”), vertex.label
+= NA, edge.arrow.size = 0.5, edge.arrow.width = 0.5, edge.width =
+edge_attr(tweets_graph)$n, edge.color=hsv(h=.9, s=1, v=.7, alpha = 0.5),
+main=“título”)</p>
+<div id="layouts-basados-en-fuerzas-y-repulsión" class="section level2">
+<h2>Layouts basados en fuerzas y repulsión</h2>
+<p>library(devtools)
+devtools::install_github(“analyxcompany/ForceAtlas2”)
+library(ForceAtlas2)</p>
+<p>Prueba los graphs que mejor queden en los datos y lo imprime en
+pantalla y genera el layout para luego pintarlo con igraph.</p>
+<p>force_layout &lt;- layout.forceatlas2(tweets_graph, iterations = 200,
+plotstep = 20)</p>
+<p>plot(tweets_graph, layout = force_layout, vertex.color = “blue”,
+vertex.size = degree(tweets_graph, mode = “in”), vertex.label = NA,
+edge.arrow.size = 0.5, edge.arrow.width = 0.5, edge.width =
+edge_attr(tweets_graph)$n, edge.color=hsv(h=.9, s=1, v=.7, alpha = 0.5),
+main=“título”)</p>
+<div id="gephi" class="section level3">
+<h3>Gephi</h3>
+<p>App de visualización de grafos a partir del Rdata y convertir a
+graph.ml</p>
+<p>write.graph(tweets_graph, file=“pathname.graphml”, format=
+“graphml”)</p>
+<p>layout: Yigan Hu: repulsión</p>
 </div>
 </div>
-</div>
-<div id="graphs---red-de-grafos" class="section level1">
-<h1>Graphs - Red de grafos</h1>
-<p>library(igraph)</p>
-<p>se escriben los elementos(aristas) dos a dos:</p>
-<p>g.dir &lt;- graph(edges = c(1,2, 2,3, 2,4, 1,4, 5,5, 3,6, 5,6), n=6)
-##vectores origen,destino, n=nodos g.n_dir &lt;- graph(edges = c(1,2,
-2,3, 2,4, 1,4, 5,5, 3,6, 5,6), n=6, directed = F) #no dirigido</p>
-<p>plot(g.dir) plot(g.n_dir)</p>
-<p>con elementos aislados:</p>
-<p>g_isolated &lt;- graph(edges = c(“Juan”, “María”, “María”, “Ana”,
-“Ana”, “Juan”, “José”, “María”, “Pedro”, “José”, “Joel”, “Pedro”),
-isolates = c( “Carmen”, “Antonio”, ##no relacionados “Mario”,
-“Vicente”))</p>
-<p>personalizado:</p>
-<p>par(mfrow = c(1,1)) plot(g_isolated, edge.arrow.size = 1,
-vertex.color=“gold”,vertex.size = 15, vertex.frame.color = “gray”,
-vertex.label.color = “black”, vertex.label.cex = 0.8, vertex.label.dist
-= 2, edge.curved=0.2)</p>
-<p>Si queremos que siempre salga igual set_seed() configuramos una
-semilla.</p>
-</div>
-<div id="etiquetas-y-leyendas" class="section level1">
-<h1>Etiquetas y leyendas</h1>
-<p>ggtitle(titulo) xlab(eje x) ylab(eje y) labs(….)</p>
-<p>…boxplot(x,y,fill)…+</p>
-<p>labs(fill = “factor”) + ## split por factor - etiquetas en la leyenda
-theme(legend.position = “bottom”) + ##posición leyenda guides(fill = F)
-## nos cargamos la leyenda</p>
-<div id="temas" class="section level3">
-<h3>Temas</h3>
-<p>theme_bw()+ theme_dark()+ theme_classic()+ theme_grey()+
-theme(plot.background = element_rect(fill=“darkblue”)) theme(axis.text.x
-= element_text(face = “bold”, family = “Times”, size = 14, angle = 45,
-color = “#995566”), axis.text.y = element_text(face = “italic”, family =
-“Courier”, size = 16, angle = 30, color = “#449955”) )+
-theme(panel.border = element_blank())+ ##eliminar borde del gráfico
-theme(panel.grid.major = element_blank(), ##eliminar la parrilla mayor
-(grid) panel.grid.minor = element_blank()) ##eliminar la parrilla
-menor</p>
-</div>
-</div>
-<div id="gráficos-multivariante" class="section level1">
-<h1>Gráficos multivariante</h1>
-<p>library(ggplot2) library(GGally)</p>
-<p>ggplot(df, aes(x=x, y = y))+ geom_point(size=3,
-aes(color=variable_factor))+ theme(legend.position = “bottom”)+
-geom_smooth(method=“lm”, se=F, col=“red”)+ facet_grid(var_y1 ~ var_x2)
-##añadir dimensión adicional en formato parrilla/ crea una matriz de
-gráficas</p>
-<p>GGAlly-visión general de un dataframe</p>
-<p>Diagonal: función de distribución (variable con respecto a si misma)
-Matriz simétrica: puntos simétricos se complementan: scatterplot -
-correlación</p>
-<p>ggpairs(df[,num_cols_repr], aes(colour = factor, alpha = 0.4), title
-= “Análisis multivariante de x”, upper = list(continuous = “density”),
-lower = list(combo = “denstrip”))+ theme(plot.title = element_text(hjust
-= 0.5))</p>
-</div>
-<div id="gráficos-3d" class="section level1">
-<h1>Gráficos 3D</h1>
-<p>VER</p>
-</div>
-<div id="exportar-gráficos-a-varios-formatos-de-salida" class="section level1">
-<h1>Exportar gráficos a varios formatos de salida</h1>
-<p>Antes de realizar el gráfico se llama a la función del formato:</p>
-<p>png(file=“multivariant.png”, width = 3000, height = 3000, res = 72)
-postscript(file=“multivariant.ps”) pdf(file=“multivariant.pdf”)</p>
-<p>Al terminar el gráfico:</p>
-<p>dev.off()</p>
 </div>
 
 

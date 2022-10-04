@@ -290,14 +290,47 @@ panel.grid.minor = element_blank()) ##eliminar la parrilla menor
 
 # Gráficos multivariante
 
+library(ggplot2)
+library(GGally)
+
+ggplot(df, aes(x=x, y = y))+
+  geom_point(size=3, aes(color=variable_factor))+
+  theme(legend.position = "bottom")+
+  geom_smooth(method="lm", se=F, col="red")+
+  facet_grid(var_y1 ~ var_x2) ##añadir dimensión adicional en formato parrilla/ crea una matriz de gráficas
+  
+  
+ GGAlly-visión general de un dataframe 
+ 
+ Diagonal: función de distribución (variable con respecto a si misma)
+ Matriz simétrica: puntos simétricos se complementan: scatterplot - correlación
+  
+
+
+ggpairs(df[,num_cols_repr], 
+        aes(colour = factor, 
+            alpha = 0.4),
+        title = "Análisis multivariante de x",
+        upper = list(continuous = "density"),
+        lower = list(combo = "denstrip"))+
+  theme(plot.title = element_text(hjust = 0.5))  
+
+
+
 
 
 # Gráficos 3D
 VER
 
  
- 
- 
- 
-  
+# Exportar gráficos a varios formatos de salida
 
+Antes de realizar el gráfico se llama a la función del formato:
+
+png(file="multivariant.png", width = 3000, height = 3000, res = 72)
+postscript(file="multivariant.ps")
+pdf(file="multivariant.pdf")
+ 
+Al terminar el gráfico:
+  
+dev.off()
