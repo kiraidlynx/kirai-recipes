@@ -1,0 +1,58 @@
+---
+title: "12 - r integration"
+author: "Ccanadas"
+date: "2022-10-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#  Objetos de Java
+
+library(rJava)
+setwd(): carpeta para usar las clases de Java
+
+funciones y métodos comienzan en .j
+
+#### Clase String de Java
+#### Vectores en Java
+#### Calendarios y arrays
+
+
+# Integración con Excel
+
+Paquetes: xlsx, RExcel, XLConnect
+
+write.xlsx(df, file="file.xlsx", sheetName="nombre", row.names=F) /Se modifican los cambios dentro de R
+
+Escribir en un excel desde R
+
+df.wb<- createWorkbook()
+sheet1<-createSheet(df.wb, "df1")
+rows<-createRow(sheet1, rowIndex=1)
+cell.1<-createCell(rows, colIndex=1)[[1,1]]
+setCellValue(cell.1, "value")
+addDataFrame(df_original, sheet1, startRow=3, row.names=F)
+
+Es posible modificar el estilo de las celdas con CellStyle + sintaxis ggplot2
+
+
+Cargar workbook: wb<-loadWorkbook("path")
+Cargar sheet: sheets<-getSheets(wb)
+sheet<-sheets[[1]] // es una lista, para obtener solo una sheet
+addDataFrame([filas y col donde queramos, la hoja que queramos guardar, startColumn= columna para empezar, startRow=fila para empezar, row.names=F]) //añadir al workbook original nuevas páginas
+
+saveWorkbook(wb, "path")
+
+Para leer: read.xlsx("path", sheetIndex=i , sheetName="nombre", rowIndex=i:j, colIndex:i:j)
+
+
+
+
+
+
+
+
+

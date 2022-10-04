@@ -11,9 +11,9 @@
 
 <meta name="author" content="Ccanadas" />
 
-<meta name="date" content="2022-10-03" />
+<meta name="date" content="2022-10-04" />
 
-<title>11 - R eficiency</title>
+<title>12 - r integration</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -363,154 +363,48 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">11 - R eficiency</h1>
+<h1 class="title toc-ignore">12 - r integration</h1>
 <h4 class="author">Ccanadas</h4>
-<h4 class="date">2022-10-03</h4>
+<h4 class="date">2022-10-04</h4>
 
 </div>
 
 
-<div id="operaciones-vectorizadas" class="section level1">
-<h1>Operaciones vectorizadas</h1>
-<p>paste(v1,v2): toma dos vectores o df y los combina como si fuese un
-bucle</p>
-<p>función substr(string,1,2) : te quedas con el string original
-empezando en el primero y terminando en el segundo caracter</p>
-<p>sum(), min(), prod(), range()…. todo operaciones sobre vectores sin
-usar bucles</p>
-<p>colSums(), rowSums(), colMeans(), rowMeans()</p>
-<div id="función-apply" class="section level2">
-<h2>Función Apply</h2>
-<p>Aplicar una función a filas o columnas a una matriz.</p>
-<p>apply(matriz, 1, funcion) : por filas apply(matriz, 2, funcion) : por
-columnas apply(matriz, c(1,2), funcion) : todos los elementos</p>
-<p>apply(m, 1, funcion, parámetros de la función)</p>
-<p>margin=3 para arrays 3d</p>
+<div id="objetos-de-java" class="section level1">
+<h1>Objetos de Java</h1>
+<p>library(rJava) setwd(): carpeta para usar las clases de Java</p>
+<p>funciones y métodos comienzan en .j</p>
+<div id="clase-string-de-java" class="section level4">
+<h4>Clase String de Java</h4>
 </div>
-<div id="funcion-sapply-lapply-tapply-by" class="section level2">
-<h2>Funcion Sapply, Lapply, tapply, by</h2>
-<p>lapply: funciones especificas a cada elemento y devuelve tipo
-lista</p>
-<p>sapply: devuelve datos numericos</p>
-<p>tapply: aplica funciones filtrando por categorías ej:
-<code>tapply(df$col, df$factor, funcion)</code> :podemos usar varios
-factores a través de una lista de factores</p>
-<p>by: aplicar una función por factor, a un df entero:
-<code>by(df, df$factor, funcion)</code></p>
+<div id="vectores-en-java" class="section level4">
+<h4>Vectores en Java</h4>
+</div>
+<div id="calendarios-y-arrays" class="section level4">
+<h4>Calendarios y arrays</h4>
 </div>
 </div>
-<div id="técnica-dividir-aplicar-combinar-split-apply-combine-map-filter-reduce" class="section level1">
-<h1>Técnica dividir-aplicar-combinar / split-apply-combine (map filter
-reduce)</h1>
-<p>Pequeños datasets: library(plyr)</p>
-<p>La sintaxis es sencilla:</p>
-<p>XYply: X (entrada),Y (entrada), a(array), d(data.frame), l (list)
-X,Y=a/d/l</p>
-<p>Uso:</p>
-<p>ddply(df, col/factor, función) ##dataframe(d) de entrada, dataframe
-(d) de salida</p>
-<p>ddply(df, ~variables (se pueden aplicar a varias columnas usando un
-vector c()), función)</p>
-<p>ddply(df, .factor, summarize, frec=length(factor),
-mean_var=mean(var)) ##summarize por factor</p>
-<p>con el par(mfrow) podemos pintar una matriz de plots por factores</p>
-<div id="concatenar-dfs" class="section level3">
-<h3>Concatenar DFs</h3>
-<p>l&lt;-list(l1,l1) l.big&lt;-ldply(l1, I)</p>
-</div>
-<div id="conjuntos-grandes-de-datos" class="section level2">
-<h2>Conjuntos grandes de datos</h2>
-<p>Patrón BIG DATA: library(dplyr)</p>
-<p>Conocer funciones básicas de SQL: <em>SELECT: función para
-seleccionar columnas/variables -&gt; select() </em>WHERE: filtrar
-subconjuntos de filas -&gt; filter() <em>GROUPBY: agrupar por criterio
--&gt; group_by() AGRUPACIONES / summarise() OPERACIONES SOBRE
-AGRUPACIONES </em>ORDERBY: ordenar datos -&gt; arrange() <em>JOIN:
-combinar tablas -&gt; join() </em>COLUMN ALIAS: crear nuevas variables
--&gt;</p>
-<p>subset.df&lt;-select(df, var1, var2,…) df.filtered&lt;-filter(df,
-var1 CONDITION) función mutate para añadir columna en un df a la que se
-le aplica una función: df.norm&lt;-mutate(df,
-var.norm=round((var-mean(var))/sd(var))) summarise(group_by(df, factor),
-function(variable))</p>
-<p>Operador PYPE %&gt;% (leer como ‘a continuación’): combinar
-diferentes capas /lineas de código</p>
-<p>df%&gt;% filter(condicion)%&gt;% group_by(factor)%&gt;%
-summarise(funcion(var))%&gt;%</p>
-</div>
-</div>
-<div id="data-table" class="section level1">
-<h1>Data table</h1>
-<p>Trabajar con muchos datos de forma eficiente. Parámetros: DT[i,j,by]
-:= asignación No tiene nombre de filas, tiene claves para indexar las
-filas.</p>
-<p>libray(data.table)</p>
-<p>dt&lt;-data.table(df)</p>
-<p>Formato datatable para acceder a una variable:
-dt[,.(var1,var2,…)]</p>
-<p>Filtro: df[factor%in%c(label1, label2,…)] // También podemos usar
-sentencias booleanas para filtrar</p>
-<p>Otra forma de filtrar es por similitud con la palabra reservada
-%like%</p>
-<p>dt[, funcion(var), by=factor]</p>
-<p>Definir nueva columna: dt[, mean_var:=mean(var), by=factor] ##Útil
-para clusters</p>
-<div id="añadir-variables-usando-listas" class="section level3">
-<h3>Añadir variables usando listas:</h3>
-<p>dt[, c(“mean”, “sd”, “z_mpg”):= list(mean(var), sd(var),
-round((mean-mean(var))/sd(var)),2), by=factor]</p>
-<p>Añade a cada fila el valor por factor de las funciones listadas.</p>
-</div>
-<div id="calcular-estadísticos-para-listas-de-variables" class="section level3">
-<h3>Calcular estadísticos para listas de variables</h3>
-<p>Usar listas:</p>
-<p>dt[, lapply(.SD, mean), .SDcols=c(“var1”, “var2”,…)]</p>
-<p>Usar el parámetro with=F para que devuelva un DataFrame en vez de
-DataTable.</p>
-</div>
-<div id="claves" class="section level3">
-<h3>Claves</h3>
-<p>setkey(df, factor_column) : crea una variable como clave Podemos usar
-la clave del factor para acceder a un dato o a otro: ejemplo</p>
-<p>dt[“label_key”, cols, with=F]</p>
-<p>Para cálculos usar by= key.</p>
-<p>setkeyv para seleccionar varias claves [.(key), cols] para
-acceder</p>
-<p>El propio conjunto de claves es un objeto datatable.</p>
-</div>
-</div>
-<div id="slice-and-dice" class="section level1">
-<h1>Slice and Dice</h1>
-<p>.N :para contar by=factor // “label”,.N</p>
-<p>[, var:=NULL] // eliminar columna</p>
-<p>##JOIN</p>
-<p>Para cruzar datos, hay que crear data.tables y unirlas a partir de
-join para consultas</p>
-<p>Usar el combine&lt;-dt1[dt2] donde haya una columna de claves en
-común</p>
-<p>nomatch=0 elimina las filas extras si no hay ocurrencias de una
-clave</p>
-<p>CUIDADO!</p>
-<p>inner join: intersección (objetos que están en las dos tablas)</p>
-<p>outter join: unión (objetos de las dos tables)</p>
-<p>función merge(): mezclar dos tablas // tabla de partida, segunda
-tabla, campo en común</p>
-<p>merge(dt1, dt2, by=“col”) // inner join</p>
-<p>leftjoin: all.x=T // right join: all.y=T // all=T full join</p>
-<div id="ejemplo" class="section level3">
-<h3>Ejemplo</h3>
-<p>#DT[i,j,by] #.SD -&gt; guardar referencia a todas las columnas (salvo
-las del by) #.SDcols -&gt; la referencia guardada a las columnas (son
-las que se pueden incluir o excluir en la ‘j’) #.EACHI -&gt; para
-agrupar por claves #.N -&gt; contar número de filas #.I -&gt; los
-índices indicados en el DT</p>
-<p>#Sueldo máximo de cada departamento…. empl.dt[dept2.dt, max(.SD), by
-= .EACHI, .SDcols = “Salary” ]</p>
-<p>#Sueldo promedio por departamento empl.dt[, .(AvgSalary = lapply(.SD,
-mean)), by = “DeptId”, .SDcols = “Salary”]</p>
-<p>empl.dt[dept2.dt, list(DeptName, AvgSalary = lapply(.SD, mean)), by =
-.EACHI, .SDcols = “Salary”]</p>
-</div>
+<div id="integración-con-excel" class="section level1">
+<h1>Integración con Excel</h1>
+<p>Paquetes: xlsx, RExcel, XLConnect</p>
+<p>write.xlsx(df, file=“file.xlsx”, sheetName=“nombre”, row.names=F) /Se
+modifican los cambios dentro de R</p>
+<p>Escribir en un excel desde R</p>
+<p>df.wb&lt;- createWorkbook() sheet1&lt;-createSheet(df.wb, “df1”)
+rows&lt;-createRow(sheet1, rowIndex=1) cell.1&lt;-createCell(rows,
+colIndex=1)[[1,1]] setCellValue(cell.1, “value”)
+addDataFrame(df_original, sheet1, startRow=3, row.names=F)</p>
+<p>Es posible modificar el estilo de las celdas con CellStyle + sintaxis
+ggplot2</p>
+<p>Cargar workbook: wb&lt;-loadWorkbook(“path”) Cargar sheet:
+sheets&lt;-getSheets(wb) sheet&lt;-sheets[[1]] // es una lista, para
+obtener solo una sheet addDataFrame([filas y col donde queramos, la hoja
+que queramos guardar, startColumn= columna para empezar, startRow=fila
+para empezar, row.names=F]) //añadir al workbook original nuevas
+páginas</p>
+<p>saveWorkbook(wb, “path”)</p>
+<p>Para leer: read.xlsx(“path”, sheetIndex=i , sheetName=“nombre”,
+rowIndex=i:j, colIndex:i:j)</p>
 </div>
 
 

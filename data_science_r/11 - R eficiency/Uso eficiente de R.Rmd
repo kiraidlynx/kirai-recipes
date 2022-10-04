@@ -171,16 +171,49 @@ El propio conjunto de claves es un objeto datatable.
 [, var:=NULL] // eliminar columna
 
 
+##JOIN
+
+Para cruzar datos, hay que crear data.tables y unirlas a partir de join para consultas
+
+Usar el combine<-dt1[dt2] donde haya una columna de claves en común
+
+nomatch=0 elimina las filas extras si no hay ocurrencias de una clave
+
+CUIDADO!
+
+inner join: intersección (objetos que están en las dos tablas)
+
+outter join: unión (objetos de las dos tables)
+
+
+función merge(): mezclar dos tablas // tabla de partida, segunda tabla, campo en común
+
+merge(dt1, dt2, by="col") // inner join
+
+leftjoin: all.x=T // right join: all.y=T // all=T full join
 
 
 
+### Ejemplo
+
+ #DT[i,j,by]
+ #.SD -> guardar referencia a todas las columnas (salvo las del by)
+  #.SDcols -> la referencia guardada a las columnas (son las que se pueden incluir o excluir en la 'j')
+ #.EACHI -> para agrupar por claves (se usa en el by)
+ #.N -> contar  número de filas 
+ #.I -> los índices indicados en el DT
 
 
+ #Sueldo máximo de cada departamento....
+empl.dt[dept2.dt, max(.SD), by = .EACHI, .SDcols = "Salary" ] #SDcols para especificar la variable a medir
 
+ #Sueldo promedio por departamento
+empl.dt[, .(AvgSalary = lapply(.SD, mean)),
+        by = "DeptId", .SDcols = "Salary"]
 
-
-
-
+empl.dt[dept2.dt, list(DeptName, 
+                       AvgSalary = lapply(.SD, mean)),
+        by = .EACHI, .SDcols = "Salary"]
 
 
 
