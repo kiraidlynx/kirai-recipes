@@ -50,6 +50,185 @@ Para leer: read.xlsx("path", sheetIndex=i , sheetName="nombre", rowIndex=i:j, co
 
 
 
+#Bases de datos relacionals
+
+library(RODBC)
+library(RJDBC) / bad
+library(ROracle)
+library(RMySQL)
+
+
+##MySQL
+
+
+## Libreria RODBC (anecdótico)
+
+con <- odbcConnect("MySQL")
+
+Crear una conexión desde ODBC a MySQL
+
+```{r, eval=FALSE}
+library(DBI)
+library(RMySQL)
+library(RODBC)
+con<-odbcConnect("myodbc", uid:ccanadas, pwd="pass")
+odbcDataSources()
+
+
+```
+
+custData <- sqlQuery(con, "select rating from RecommendationSystem.Rating limit 5;") 
+Esta consulta de DB crea un objeto dataframe en R.
+
+
+customers <- c("Juan Gabriel", "Ricardo", "María")
+orderdate <- as.Date(c('2018-01-25', '2017-12-31', '2017-12-1'))
+orderamount <- c(350, 44.65, 105.32)
+orders <- data.frame(customers, orderdate, orderamount)
+
+sqlSave(con, orders, "RecommendationSystem.Orders", append = F) ##append=T lo añade al final de la tabla, en F destruye lo anterior
+
+df <- sqlQuery(con, "select * from RecommendationSystem.Orders")
+df
+
+
+## Libreria MySQL
+
+
+con<-dbConnect(drv=MySQL(), dbmain="nombre de base de datos", host="url local o externa",
+                port=3306, username="ccanadas", password="pass")
+                
+dbReadTable(con, "nombre de tabla")
+
+
+consulta: df<-dbGetQuery(con, "select * from DATABSE where VARIABLE like %param%")
+
+
+crear o añadir datos a una tabla: dbWrite(con, "nombre_tabla", df_en_R) // + consulta
+
+dbSendQuery: función de consulta
+
+rs <- dbSendQuery(con, paste("SELECT a.location, max(a.price)",
+                             "FROM Accomodation a ", 
+                             "GROUP BY a.location ",
+                             "ORDER BY max(a.price) DESC"))
+
+Mostrar datos mientras se procesa la consulta. Paginación.
+while(!dbHasCompleted(rs)){
+  print(fetch(rs, n = 2)) # n = -1 para obtenerlos todos de golpe
+}
+
+dbClearResult(rs) ##limpiar caché una vez acabado
+dbDisconnect(con) ##cerrar conexión
+dbListConnections(dbDriver("MySQL"))
+
+
+
+# Mongo DB
+
+## Ejemplo csv::crimes
+
+library: rmongodb, mongolite
+add libr: data.table ::fread // lectura rápida
+
+crimes = data.table::fread("../../../data/tema13/Chicago_Crimes_2012_to_2017.csv")
+
+
+### Funciones de mongolite
+
+Carga de un dataframe a mongo:
+
+
+crime_collection = mongo(collection = "full_crimes", ##nombre que le queremos dar al DF (tabla)
+                         db = "Chicago") ##nombre de la base de datos
+
+crime_collection$insert(crimes) ##Cargar DF a una base de datos de mongo
+
+crime_collection$count() ##número de observaciones
+
+`crime_collection$iterate()$one()` ##devuelve el primer objeto
+
+
+### Funciones de RMongo
+
+mongo <- mongo.create(host = "localhost:27017") ##crear conexión
+
+mongo.is.connected(mongo) ## saber si estamos conectados (mongo es el objeto)
+
+mongo.get.database.collections(mongo, "Chicago") ##obtener todas las colecciones de la entidad chicago
+
+mongo.find.one(mongo, ns = "Chicago.crimes") ##devolver un crimen aleatorio de la tabla
+
+mongo.find.all(mongo, ns = "Chicago.crimes") ##
+
+
+
+
+### MongoLite
+
+Consulta de big data: extraer datos que me interesen con filtros y consultas a mongo:
+
+
+crime_collection$count('{ "Primary Type" : "ASSAULT" }') #consulta tipo jsonlite: recuento de un factor
+consulta: ('{"factor_col" : "valor_etiqueta"} ')
+
+library(dplyr)
+crimes <- crime_collection$find('{}',  ##bsuqueda de entre todos los disponibles
+                                fields = '{"Primary Type" : 1, "Year":1}') ##filtro de búsqueda
+                                
+Y podemos hacer cualquier tipo de búsqueda y filtros a partir del objeto mongo y trabajar de forma usual en R.
+
+crimes %>% group_by(`Primary Type`) %>% 
+  summarize(Count=n()) %>% arrange(desc(Count)) %>% head(10)
+
+crimes %>% group_by(Year) %>%
+  summarize(Count = n()) %>% arrange(desc(Count))
+
+Usar sintaxis de jsonlite para filtrar y agrupar.
+
+
+
+# Spark
+
+Framework rápido para cálculo de computacioens de interactivas, iterativas para big data que se distribuyen por servidores.
+Nuevo curso.
+
+### Ejemplo
+
+library(devtools)
+devtools::install_github("apache/spark@v2.2.1", 
+                         subdir = "R/pkg")
+
+library(SparkR)
+sparkR.session()
+
+iris.df <- createDataFrame(iris) ##Dataframe tipo Spark
+
+showDF(iris.df, 5)  ##Mostrar df tipo spark
+
+sub.iris.df <- select(iris.df, 
+                      c("Sepal_Length", "Petal_Length"))  
+showDF(sub.iris.df, 5)
+
+library(magrittr) ##encadenar pype con los %>% diferentes acciones, forma parte del paquete dplyr
+
+agr.iris.df <- iris.df %>% groupBy("Species") %>%
+  avg("Sepal_Length") %>%
+  withColumnRenamed("avg(Sepal_Length)", "Avg_Sepal_Length") %>%
+  orderBy("Species")
+agr.iris.df$Avg_Sepal_Length <- format_number(agr.iris.df$Avg_Sepal_Length,2)
+
+showDF(agr.iris.df)
+
+createOrReplaceTempView(iris.df, "IrisTable")
+collect(sql("SELECT * FROM IrisTable LIMIT 10"))
+collect(sql(paste("SELECT Species sp, avg(Sepal_Length) avg_sl, ",
+                  "avg(Sepal_Width) avg_sw FROM IrisTable ",
+                  "GROUP BY sp ORDER BY avg_sl desc")))
+
+
+Misma sintaxis que cualquier librería de DB, consultar las funciones específicas en la documentación.
+
 
 
 

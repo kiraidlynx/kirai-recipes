@@ -405,6 +405,132 @@ páginas</p>
 <p>saveWorkbook(wb, “path”)</p>
 <p>Para leer: read.xlsx(“path”, sheetIndex=i , sheetName=“nombre”,
 rowIndex=i:j, colIndex:i:j)</p>
+<p>#Bases de datos relacionals</p>
+<p>library(RODBC) library(RJDBC) / bad library(ROracle)
+library(RMySQL)</p>
+<p>##MySQL</p>
+<div id="libreria-rodbc-anecdótico" class="section level2">
+<h2>Libreria RODBC (anecdótico)</h2>
+<p>con &lt;- odbcConnect(“MySQL”)</p>
+<p>Crear una conexión desde ODBC a MySQL</p>
+<pre class="r"><code>library(DBI)
+library(RMySQL)
+library(RODBC)
+con&lt;-odbcConnect(&quot;myodbc&quot;, uid:ccanadas, pwd=&quot;pass&quot;)
+odbcDataSources()</code></pre>
+<p>custData &lt;- sqlQuery(con, “select rating from
+RecommendationSystem.Rating limit 5;”) Esta consulta de DB crea un
+objeto dataframe en R.</p>
+<p>customers &lt;- c(“Juan Gabriel”, “Ricardo”, “María”) orderdate &lt;-
+as.Date(c(‘2018-01-25’, ‘2017-12-31’, ‘2017-12-1’)) orderamount &lt;-
+c(350, 44.65, 105.32) orders &lt;- data.frame(customers, orderdate,
+orderamount)</p>
+<p>sqlSave(con, orders, “RecommendationSystem.Orders”, append = F)
+##append=T lo añade al final de la tabla, en F destruye lo anterior</p>
+<p>df &lt;- sqlQuery(con, “select * from RecommendationSystem.Orders”)
+df</p>
+</div>
+<div id="libreria-mysql" class="section level2">
+<h2>Libreria MySQL</h2>
+<p>con&lt;-dbConnect(drv=MySQL(), dbmain=“nombre de base de datos”,
+host=“url local o externa”, port=3306, username=“ccanadas”,
+password=“pass”)</p>
+<p>dbReadTable(con, “nombre de tabla”)</p>
+<p>consulta: df&lt;-dbGetQuery(con, “select * from DATABSE where
+VARIABLE like %param%”)</p>
+<p>crear o añadir datos a una tabla: dbWrite(con, “nombre_tabla”,
+df_en_R) // + consulta</p>
+<p>dbSendQuery: función de consulta</p>
+<p>rs &lt;- dbSendQuery(con, paste(“SELECT a.location, max(a.price)”,
+“FROM Accomodation a”, “GROUP BY a.location”, “ORDER BY max(a.price)
+DESC”))</p>
+<p>Mostrar datos mientras se procesa la consulta. Paginación.
+while(!dbHasCompleted(rs)){ print(fetch(rs, n = 2)) # n = -1 para
+obtenerlos todos de golpe }</p>
+<p>dbClearResult(rs) ##limpiar caché una vez acabado dbDisconnect(con)
+##cerrar conexión dbListConnections(dbDriver(“MySQL”))</p>
+</div>
+</div>
+<div id="mongo-db" class="section level1">
+<h1>Mongo DB</h1>
+<div id="ejemplo-csvcrimes" class="section level2">
+<h2>Ejemplo csv::crimes</h2>
+<p>library: rmongodb, mongolite add libr: data.table ::fread // lectura
+rápida</p>
+<p>crimes =
+data.table::fread(“../../../data/tema13/Chicago_Crimes_2012_to_2017.csv”)</p>
+<div id="funciones-de-mongolite" class="section level3">
+<h3>Funciones de mongolite</h3>
+<p>Carga de un dataframe a mongo:</p>
+<p>crime_collection = mongo(collection = “full_crimes”, ##nombre que le
+queremos dar al DF (tabla) db = “Chicago”) ##nombre de la base de
+datos</p>
+<p>crime_collection$insert(crimes) ##Cargar DF a una base de datos de
+mongo</p>
+<p>crime_collection$count() ##número de observaciones</p>
+<p><code>crime_collection$iterate()$one()</code> ##devuelve el primer
+objeto</p>
+</div>
+<div id="funciones-de-rmongo" class="section level3">
+<h3>Funciones de RMongo</h3>
+<p>mongo &lt;- mongo.create(host = “localhost:27017”) ##crear
+conexión</p>
+<p>mongo.is.connected(mongo) ## saber si estamos conectados (mongo es el
+objeto)</p>
+<p>mongo.get.database.collections(mongo, “Chicago”) ##obtener todas las
+colecciones de la entidad chicago</p>
+<p>mongo.find.one(mongo, ns = “Chicago.crimes”) ##devolver un crimen
+aleatorio de la tabla</p>
+<p>mongo.find.all(mongo, ns = “Chicago.crimes”) ##</p>
+</div>
+<div id="mongolite" class="section level3">
+<h3>MongoLite</h3>
+<p>Consulta de big data: extraer datos que me interesen con filtros y
+consultas a mongo:</p>
+<p>crime_collection$count(‘{ “Primary Type” : “ASSAULT” }’) #consulta
+tipo jsonlite: recuento de un factor consulta: (‘{“factor_col” :
+“valor_etiqueta”}’)</p>
+<p>library(dplyr) crimes &lt;- crime_collection$find(‘{}’, ##bsuqueda de
+entre todos los disponibles fields = ‘{“Primary Type” : 1, “Year”:1}’)
+##filtro de búsqueda</p>
+<p>Y podemos hacer cualquier tipo de búsqueda y filtros a partir del
+objeto mongo y trabajar de forma usual en R.</p>
+<p>crimes %&gt;% group_by(<code>Primary Type</code>) %&gt;%
+summarize(Count=n()) %&gt;% arrange(desc(Count)) %&gt;% head(10)</p>
+<p>crimes %&gt;% group_by(Year) %&gt;% summarize(Count = n()) %&gt;%
+arrange(desc(Count))</p>
+<p>Usar sintaxis de jsonlite para filtrar y agrupar.</p>
+</div>
+</div>
+</div>
+<div id="spark" class="section level1">
+<h1>Spark</h1>
+<p>Framework rápido para cálculo de computacioens de interactivas,
+iterativas para big data que se distribuyen por servidores. Nuevo
+curso.</p>
+<div id="ejemplo" class="section level3">
+<h3>Ejemplo</h3>
+<p>library(devtools) devtools::install_github(“<a href="mailto:apache/spark@v2.2.1" class="email">apache/spark@v2.2.1</a>”, subdir = “R/pkg”)</p>
+<p>library(SparkR) sparkR.session()</p>
+<p>iris.df &lt;- createDataFrame(iris) ##Dataframe tipo Spark</p>
+<p>showDF(iris.df, 5) ##Mostrar df tipo spark</p>
+<p>sub.iris.df &lt;- select(iris.df, c(“Sepal_Length”,
+“Petal_Length”))<br />
+showDF(sub.iris.df, 5)</p>
+<p>library(magrittr) ##encadenar pype con los %&gt;% diferentes
+acciones, forma parte del paquete dplyr</p>
+<p>agr.iris.df &lt;- iris.df %&gt;% groupBy(“Species”) %&gt;%
+avg(“Sepal_Length”) %&gt;% withColumnRenamed(“avg(Sepal_Length)”,
+“Avg_Sepal_Length”) %&gt;% orderBy(“Species”) agr.iris.df<span class="math inline">\(Avg_Sepal_Length &lt;-
+format_number(agr.iris.df\)</span>Avg_Sepal_Length,2)</p>
+<p>showDF(agr.iris.df)</p>
+<p>createOrReplaceTempView(iris.df, “IrisTable”) collect(sql(“SELECT *
+FROM IrisTable LIMIT 10”)) collect(sql(paste(“SELECT Species sp,
+avg(Sepal_Length) avg_sl,”, “avg(Sepal_Width) avg_sw FROM IrisTable”,
+“GROUP BY sp ORDER BY avg_sl desc”)))</p>
+<p>Misma sintaxis que cualquier librería de DB, consultar las funciones
+específicas en la documentación.</p>
+</div>
 </div>
 
 
