@@ -1,0 +1,5 @@
+    INSERT INTO Pais VALUES('ARG', 'argentina')
+    INSERT INTO Pais VALUES('ESP', 'españa')
+    INSERT INTO Pais VALUES('MEX', 'mexico')
+	INSERT INTO Pais VALUES('PER', 'peru')
+	INSERT INTO Pais VALUES('COL', 'colombia')

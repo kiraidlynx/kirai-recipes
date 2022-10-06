@@ -1,0 +1,1 @@
+dbcc CHECKIDENT('TABLA', RESEED, 0)
