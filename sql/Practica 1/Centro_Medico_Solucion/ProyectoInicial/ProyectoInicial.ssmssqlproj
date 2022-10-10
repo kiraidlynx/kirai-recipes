@@ -19,11 +19,77 @@
     </LogicalFolder>
     <LogicalFolder Name="Queries" Type="0" Sorted="true">
       <Items>
-        <FileNode Name="SQLQuery1.sql">
+        <FileNode Name="Comandos.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-OSB94U8:False:sa</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>DESKTOP-OSB94U8</AssociatedConnSrvName>
           <AssociatedConnUserName>sa</AssociatedConnUserName>
-          <FullPath>SQLQuery1.sql</FullPath>
+          <FullPath>Comandos.sql</FullPath>
+        </FileNode>
+        <FileNode Name="EstructurasControl.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-OSB94U8:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-OSB94U8</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>EstructurasControl.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SP_ALTA_turno.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-OSB94U8:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-OSB94U8</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>SP_ALTA_turno.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SP_DEL_Turno.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-OSB94U8:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-OSB94U8</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>SP_DEL_Turno.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SP_Insertar_med.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-OSB94U8:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-OSB94U8</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>SP_Insertar_med.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SP_Insertar_reg.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-OSB94U8:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-OSB94U8</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>SP_Insertar_reg.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SP_Sel_EspecialidadesMedicas.sql">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>SP_Sel_EspecialidadesMedicas.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SP_Sel_HistoriaPaciente.sql">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>SP_Sel_HistoriaPaciente.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SP_Sel_TurnosPaciente.sql">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>SP_Sel_TurnosPaciente.sql</FullPath>
+        </FileNode>
+        <FileNode Name="SP_UPD.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-OSB94U8:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-OSB94U8</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>SP_UPD.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Store_Procedure.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-OSB94U8:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-OSB94U8</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>Store_Procedure.sql</FullPath>
+        </FileNode>
+        <FileNode Name="Views.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-OSB94U8:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-OSB94U8</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>Views.sql</FullPath>
         </FileNode>
       </Items>
     </LogicalFolder>
