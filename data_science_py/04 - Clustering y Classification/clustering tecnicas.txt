@@ -1,0 +1,9 @@
+* Podemos estimar la k:
+    * No: Propagación de la afinidad
+    * Si: Podemos usar la distancia Euclídea:
+        * Si: K-Means
+        * No: Buscar valores centrales:
+            * Si: K-Medoides 
+            * No: Los datos son linealmente separables:
+                * Si: Clustering aglomerativo
+                * No: Clustering Espectral
